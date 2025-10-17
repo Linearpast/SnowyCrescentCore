@@ -4,16 +4,15 @@ import com.linearpast.sccore.capability.network.SimpleCapabilityPacket;
 import com.linearpast.sccore.network.Channel;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
 import net.minecraftforge.common.util.INBTSerializable;
-
-import java.util.UUID;
 
 public interface ICapabilitySync extends INBTSerializable<CompoundTag> {
     void setDirty(boolean dirty);
     boolean isDirty();
 
-    void setOwnerUUID(UUID uuid);
-    UUID getOwnerUUID();
+    CompoundTag toTag(CompoundTag tag);
+    void fromTag(CompoundTag tag);
 
     /**
      * 该方法重写时应该在最后调用super方法
@@ -21,18 +20,18 @@ public interface ICapabilitySync extends INBTSerializable<CompoundTag> {
      * @param listenDone 最后是否执行完成方法 {@link ICapabilitySync#onCopyDone()}
      */
     default void copyFrom(ICapabilitySync oldData, boolean listenDone) {
-        this.setOwnerUUID(oldData.getOwnerUUID());
         this.setDirty(oldData.isDirty());
         if(listenDone) onCopyDone();
     }
 
     /**
-     * 当copy的时候，如果某些值需要被重定义，你应该重写这个方法
+     * 当copy结束之后，如果某些值需要被重定义，你应该重写这个方法 <br>
+     * 多用于玩家 跨越维度/死亡 时重置数据
      */
     default void onCopyDone(){}
 
     /**
-     * 一般情况下建议重写，否则会以sccore的Channel发送
+     * 一般情况下建议重写，否则会以sccore的Channel实例发送<br>
      * 服务端给全体玩家发送客户端同步数据
      */
     default void sendToClient(){
@@ -40,7 +39,7 @@ public interface ICapabilitySync extends INBTSerializable<CompoundTag> {
     }
 
     /**
-     * 一般情况下建议重写，否则会以sccore的Channel发送
+     * 一般情况下建议重写，否则会以sccore的Channel实例发送<br>
      * 服务端给单个玩家发送客户端同步数据
      * @param player 发送给的目标玩家
      */
@@ -54,5 +53,6 @@ public interface ICapabilitySync extends INBTSerializable<CompoundTag> {
      * 一般情况下，你应该extends SimpleCapabilityPacket然后重写该方法返回你的子类
      * @return 网络包类SimpleCapabilityPacket
      */
-    SimpleCapabilityPacket getDefaultPacket();
+    SimpleCapabilityPacket<? extends Entity> getDefaultPacket();
+
 }

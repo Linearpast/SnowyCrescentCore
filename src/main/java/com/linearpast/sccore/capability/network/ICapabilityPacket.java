@@ -1,15 +1,15 @@
-package com.linearpast.snowy_crescent_core.capability.network;
+package com.linearpast.sccore.capability.network;
 
-import com.linearpast.snowy_crescent_core.capability.data.ICapabilitySync;
+import com.linearpast.sccore.capability.data.ICapabilitySync;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.Entity;
 import net.minecraftforge.network.NetworkEvent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Supplier;
 
-public interface ICapabilityPacket {
+public interface ICapabilityPacket<T extends Entity> {
     /**
      * 解码网络包
      * @param buf FriendlyByteBuf
@@ -33,10 +33,10 @@ public interface ICapabilityPacket {
 
     /**
      * 在网络包中获取对应的capability，一般在 {@link ICapabilityPacket#syncData}后执行
-     * @param player 目标玩家
+     * @param entity 目标实体
      * @return 返回Capability
      */
-    @Nullable ICapabilitySync getCapability(Player player);
+    @Nullable ICapabilitySync getCapability(T entity);
 
     /**
      * 获取Tag

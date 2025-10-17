@@ -4,14 +4,17 @@ import com.linearpast.sccore.capability.data.ICapabilitySync;
 import net.minecraft.nbt.CompoundTag;
 
 /**
- * 实现时建议手动添加一个字段以及方法，例如：
+ * 实现时建议手动添加：<br>
+ * key  —— 作为cap的唯一标识 <br>
+ * getCapability(Entity entity) —— 获取cap的简化方法<br>
+ * 例：
  * <pre>
  * {@code
  *     public static final ResourceLocation key =
- *          new ResourceLocation(MyMod.MODID, "my_data");
- *     public static Optional<MyDataCapability> getCapability(Player player){
- *         return Optional.ofNullable(EntityCapabilityHandler.getPlayerCapability(
- *             player, MyDataCapability.key, MyDataCapability.class
+ *          new ResourceLocation(MyMod.MODID, "sheep_data");
+ *     public static Optional<SheepDataCapability> getCapability(Sheep sheep){
+ *         return Optional.ofNullable(CapabilityUtils.getEntityCapability(
+ *             player, SheepDataCapability.key, SheepDataCapability.class
  *         ));
  *     }
  * }
@@ -29,6 +32,10 @@ public abstract class SimpleEntityCapabilitySync implements ICapabilitySync {
         return dirty;
     }
 
+    /**
+     * 你应该在每个属性的setter里调用它设置为true，以触发自动同步
+     * @param dirty 是否应该同步（是否为脏）
+     */
     @Override
     public void setDirty(boolean dirty) {
         this.dirty = dirty;

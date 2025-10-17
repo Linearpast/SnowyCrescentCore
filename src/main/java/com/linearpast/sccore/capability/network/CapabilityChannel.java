@@ -5,20 +5,25 @@ import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.simple.SimpleChannel;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
- * 你应该在你的Channel中，使用：<br>
- * PlayerCapabilityChannel.create(你的Channel).add(索引, 网络包的new方法) <br>
- * 所添加的网络包必须实现了ICapabilityPacket接口
+ * 在Mod主类构造方法逻辑中调用createChannel，有两种：<br>
+ * <pre>
+ * 1. {@link com.linearpast.sccore.capability.CapabilityUtils#createChannel(SimpleChannel)}
+ * 若如此做，则必须重写Cap实体类中的所有sendToPlayer方法，并在重写中调用使用你的Channel
+ * </pre>
+ * <pre>
+ * 2. {@link com.linearpast.sccore.capability.CapabilityUtils#createChannel()}
+ * 若如此做，则网络包会以SnowyCrescentCore的Channel注册
+ * </pre>
+ * 所添加的网络包必须实现ICapabilityPacket接口
  */
-public class PlayerCapabilityChannel {
+public class CapabilityChannel {
     private final SimpleChannel channel;
-    public PlayerCapabilityChannel(SimpleChannel channel) {
+    public CapabilityChannel(SimpleChannel channel) {
         this.channel = channel;
     }
 
@@ -31,7 +36,7 @@ public class PlayerCapabilityChannel {
      * @param handler 句柄
      * @param <T> 网络包接口
      */
-    public <T extends ICapabilityPacket> void register(
+    public <T extends ICapabilityPacket<?>> void register(
             Class<T> clazz,
             int cid,
             Function<FriendlyByteBuf, T> decoder,

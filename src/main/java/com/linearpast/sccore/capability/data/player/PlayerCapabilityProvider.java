@@ -1,6 +1,6 @@
-package com.linearpast.sccore.capability.data;
+package com.linearpast.sccore.capability.data.player;
 
-import com.linearpast.sccore.capability.data.player.PlayerCapabilityRegistry;
+import com.linearpast.sccore.capability.data.ICapabilitySync;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
@@ -12,10 +12,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 @AutoRegisterCapability
-public class CapabilityProvider<C extends ICapabilitySync> implements ICapabilitySerializable<CompoundTag> {
+public class PlayerCapabilityProvider<C extends ICapabilitySync> implements ICapabilitySerializable<CompoundTag> {
     private final C instance;
     private final ResourceLocation resourceLocation;
-    public CapabilityProvider(ResourceLocation resourceLocation, C instance) {
+    public PlayerCapabilityProvider(ResourceLocation resourceLocation, C instance) {
         this.resourceLocation = resourceLocation;
         this.instance = instance;
     }

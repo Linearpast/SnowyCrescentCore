@@ -1,7 +1,7 @@
-package com.linearpast.sccore.capability.data;
+package com.linearpast.sccore.capability.data.player;
 
-import com.linearpast.sccore.capability.PlayerCapabilityRegistry;
-import com.linearpast.sccore.capability.PlayerCapabilityUtils;
+import com.linearpast.sccore.capability.CapabilityUtils;
+import com.linearpast.sccore.capability.data.ICapabilitySync;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
@@ -11,6 +11,9 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 
 import java.util.Optional;
 
+/**
+ * 用于维护数据同步
+ */
 public class PlayerCapabilityRemainder {
     /**
      * 玩家跨越维度/死亡时应该转移数据到新身体上
@@ -22,8 +25,8 @@ public class PlayerCapabilityRemainder {
             Player original = event.getOriginal();
             original.reviveCaps();
             PlayerCapabilityRegistry.getCapabilityMap().forEach((key, value) -> {
-                ICapabilitySync originData = PlayerCapabilityUtils.getPlayerCapability(original, key, ICapabilitySync.class);
-                ICapabilitySync newData = PlayerCapabilityUtils.getPlayerCapability(newPlayer, key, ICapabilitySync.class);
+                ICapabilitySync originData = CapabilityUtils.getPlayerCapability(original, key, ICapabilitySync.class);
+                ICapabilitySync newData = CapabilityUtils.getPlayerCapability(newPlayer, key, ICapabilitySync.class);
                 if(originData != null && newData != null) {
                     newData.copyFrom(originData, true);
                     newData.sendToClient();
@@ -40,7 +43,7 @@ public class PlayerCapabilityRemainder {
     public static void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
         if(event.getEntity() instanceof ServerPlayer newPlayer){
             PlayerCapabilityRegistry.getCapabilityMap().forEach((key, value) -> {
-                ICapabilitySync data = PlayerCapabilityUtils.getPlayerCapability(newPlayer, key, ICapabilitySync.class);
+                ICapabilitySync data = CapabilityUtils.getPlayerCapability(newPlayer, key, ICapabilitySync.class);
                 if(data == null) return;
                 data.sendToClient(newPlayer);
             });
@@ -56,7 +59,7 @@ public class PlayerCapabilityRemainder {
     public static void onEntityBeTracked(PlayerEvent.StartTracking event) {
         if (event.getTarget() instanceof Player target && event.getEntity() instanceof ServerPlayer attacker) {
             PlayerCapabilityRegistry.getCapabilityMap().forEach((key, value) -> {
-                ICapabilitySync data = PlayerCapabilityUtils.getPlayerCapability(target, key, ICapabilitySync.class);
+                ICapabilitySync data = CapabilityUtils.getPlayerCapability(target, key, ICapabilitySync.class);
                 if(data == null) return;
                 data.sendToClient(attacker);
             });
@@ -71,7 +74,7 @@ public class PlayerCapabilityRemainder {
     public static void capabilitySync(TickEvent.PlayerTickEvent event) {
         if(!event.player.level().isClientSide){
             PlayerCapabilityRegistry.getCapabilityMap().forEach((key, value) -> {
-                ICapabilitySync data = PlayerCapabilityUtils.getPlayerCapability(event.player, key, ICapabilitySync.class);
+                ICapabilitySync data = CapabilityUtils.getPlayerCapability(event.player, key, ICapabilitySync.class);
                 if(data == null) return;
                 if(data.isDirty()) {
                     data.setDirty(false);
@@ -82,15 +85,20 @@ public class PlayerCapabilityRemainder {
     }
 
     /**
-     * 玩家登录事件<br>
+     * 玩家登录事件 <br>
+     * 重初始化登录玩家的cap <br>
+     * 将服务端所有玩家的cap发送给该玩家以初始化该玩家的客户端侧的RemotePlayer数据<br>
+     * 上一行的这个行为可能会导致卡顿，它的必要性还未知，可以发pr或issue提议删除它
      */
     public static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
         Player player = event.getEntity();
         if(!(player instanceof ServerPlayer serverPlayer)) return;
         PlayerCapabilityRegistry.getCapabilityMap().forEach((key, value) -> {
-            ICapabilitySync data = PlayerCapabilityUtils.getPlayerCapability(player, key, ICapabilitySync.class);
+            ICapabilitySync data = CapabilityUtils.getPlayerCapability(player, key, ICapabilitySync.class);
             if(data == null) return;
-            data.setOwnerUUID(serverPlayer.getUUID());
+            if(data instanceof SimplePlayerCapabilitySync capabilitySync) {
+                capabilitySync.setOwnerUUID(serverPlayer.getUUID());
+            }
             data.setDirty(false);
             data.sendToClient();
         });
@@ -98,7 +106,7 @@ public class PlayerCapabilityRemainder {
                 serverPlayers -> serverPlayers.forEach(p -> {
                     if(!p.getUUID().equals(serverPlayer.getUUID())) {
                         PlayerCapabilityRegistry.getCapabilityMap().forEach((key, value) -> {
-                            ICapabilitySync data = PlayerCapabilityUtils.getPlayerCapability(player, key, ICapabilitySync.class);
+                            ICapabilitySync data = CapabilityUtils.getPlayerCapability(player, key, ICapabilitySync.class);
                             if(data == null) return;
                             data.sendToClient(serverPlayer);
                         });

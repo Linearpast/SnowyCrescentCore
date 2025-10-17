@@ -1,9 +1,9 @@
 {
 	"required": true,
 	"minVersion": "0.8",
-	"package": "com.linearpast.snowy_crescent_core.mixin",
+	"package": "com.linearpast.sccore.mixin",
 	"compatibilityLevel": "JAVA_8",
-	"refmap": "snowy_crescent_core.refmap.json",
+	"refmap": "sccore.refmap.json",
 	"mixins": [
 	],
 	"client": [

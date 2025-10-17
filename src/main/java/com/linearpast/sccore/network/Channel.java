@@ -1,6 +1,6 @@
-package com.linearpast.snowy_crescent_core.network;
+package com.linearpast.sccore.network;
 
-import com.linearpast.snowy_crescent_core.SnowyCrescentCore;
+import com.linearpast.sccore.SnowyCrescentCore;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.fml.ModList;
