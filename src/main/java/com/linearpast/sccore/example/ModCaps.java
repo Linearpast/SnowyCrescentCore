@@ -14,7 +14,8 @@ import net.minecraftforge.eventbus.api.IEventBus;
 
 public class ModCaps {
     /**
-     * 注册capability的示例<br>
+     * 注册实体capability的示例<br>
+     * 请参阅 {@link CapabilityUtils}
      */
     public static void register(){
         //如果你想将网络包注册到你自己的mod中，createChannel(INSTANCE)
@@ -23,6 +24,7 @@ public class ModCaps {
         //不可与其他网络包重复的任意整数
         int cid = Channel.getCid();
         //注册实体cap和它的网络包
+        //若注册玩家的请用registerPlayerCapabilityWithNetwork
         CapabilityUtils.registerEntityCapabilityWithNetwork(
                 //一个resourceLocation，任意命名，不重复即可
                 SheepDataCapability.key,

@@ -2,6 +2,7 @@ package com.linearpast.sccore.capability.network;
 
 import com.linearpast.sccore.capability.data.ICapabilitySync;
 import com.linearpast.sccore.capability.data.entity.SimpleEntityCapabilitySync;
+import com.linearpast.sccore.capability.data.player.SimplePlayerCapabilitySync;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.nbt.CompoundTag;
@@ -33,7 +34,14 @@ public abstract class SimpleCapabilityPacket<T extends Entity> implements ICapab
         ClientLevel level = instance.level;
         if (level == null) return;
         CompoundTag nbt = getData();
-        Entity entity = level.getEntity(nbt.getInt(SimpleEntityCapabilitySync.Id));
+        Entity entity = null;
+        if(nbt.contains(SimpleEntityCapabilitySync.Id)){
+            entity = level.getEntity(nbt.getInt(SimpleEntityCapabilitySync.Id));
+        }
+        if(nbt.contains(SimplePlayerCapabilitySync.OwnerUUID)){
+            entity = level.getPlayerByUUID(nbt.getUUID(SimplePlayerCapabilitySync.OwnerUUID));
+        }
+        if(entity == null) return;
         try {
             ICapabilitySync data = getCapability((T) entity);
             syncData(nbt, data);

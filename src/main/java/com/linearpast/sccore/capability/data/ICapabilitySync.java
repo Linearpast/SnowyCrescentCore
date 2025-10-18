@@ -7,7 +7,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraftforge.common.util.INBTSerializable;
 
-public interface ICapabilitySync extends INBTSerializable<CompoundTag> {
+public interface ICapabilitySync<T extends Entity> extends INBTSerializable<CompoundTag> {
     void setDirty(boolean dirty);
     boolean isDirty();
 
@@ -19,7 +19,7 @@ public interface ICapabilitySync extends INBTSerializable<CompoundTag> {
      * @param oldData 旧数据
      * @param listenDone 最后是否执行完成方法 {@link ICapabilitySync#onCopyDone()}
      */
-    default void copyFrom(ICapabilitySync oldData, boolean listenDone) {
+    default void copyFrom(ICapabilitySync<?> oldData, boolean listenDone) {
         this.setDirty(oldData.isDirty());
         if(listenDone) onCopyDone();
     }
@@ -53,6 +53,12 @@ public interface ICapabilitySync extends INBTSerializable<CompoundTag> {
      * 一般情况下，你应该extends SimpleCapabilityPacket然后重写该方法返回你的子类
      * @return 网络包类SimpleCapabilityPacket
      */
-    SimpleCapabilityPacket<? extends Entity> getDefaultPacket();
+    SimpleCapabilityPacket<T> getDefaultPacket();
 
+    /**
+     * 当玩家登录 / 实体加入世界时的cao初始化时会调用 <br>
+     * 必须实现，但可为空方法
+     * @param entity 目标
+     */
+    void attachInit(T entity);
 }

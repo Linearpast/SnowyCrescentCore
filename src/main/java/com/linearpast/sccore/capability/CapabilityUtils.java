@@ -35,7 +35,7 @@ public class CapabilityUtils {
      * @param handler 网络包的handle
      */
     public static <T extends ICapabilityPacket<?>> void registerPlayerCapabilityWithNetwork(
-            ResourceLocation key, PlayerCapabilityRegistry.CapabilityRecord<? extends ICapabilitySync> capabilityRecord,
+            ResourceLocation key, PlayerCapabilityRegistry.CapabilityRecord<? extends ICapabilitySync<Player>> capabilityRecord,
             CapabilityChannel channelRegister,
             int cid,
             Class<T> clazz,
@@ -59,7 +59,7 @@ public class CapabilityUtils {
      * @param handler 网络包的handle
      */
     public static <T extends ICapabilityPacket<?>> void registerEntityCapabilityWithNetwork(
-            ResourceLocation key, EntityCapabilityRegistry.CapabilityRecord<? extends ICapabilitySync> capabilityRecord,
+            ResourceLocation key, EntityCapabilityRegistry.CapabilityRecord<? extends ICapabilitySync<? extends Entity>> capabilityRecord,
             CapabilityChannel channelRegister,
             int cid,
             Class<T> clazz,
@@ -77,7 +77,7 @@ public class CapabilityUtils {
      * @param key capability的唯一name
      * @param capabilityRecord 使用record存储了应该注册的capability的各项数据，参阅：{@link PlayerCapabilityRegistry.CapabilityRecord}
      */
-    public static <T extends ICapabilitySync> void registerPlayerCapability(ResourceLocation key, PlayerCapabilityRegistry.CapabilityRecord<T> capabilityRecord){
+    public static <T extends ICapabilitySync<Player>> void registerPlayerCapability(ResourceLocation key, PlayerCapabilityRegistry.CapabilityRecord<T> capabilityRecord){
         PlayerCapabilityRegistry.registerCapability(key, capabilityRecord);
     }
 
@@ -87,7 +87,7 @@ public class CapabilityUtils {
      * @param key capability的唯一name
      * @param capabilityRecord 使用record存储了应该注册的capability的各项数据，参阅：{@link PlayerCapabilityRegistry.CapabilityRecord}
      */
-    public static <T extends ICapabilitySync> void registerEntityCapability(ResourceLocation key, EntityCapabilityRegistry.CapabilityRecord<T> capabilityRecord){
+    public static <T extends ICapabilitySync<Entity>> void registerEntityCapability(ResourceLocation key, EntityCapabilityRegistry.CapabilityRecord<T> capabilityRecord){
         EntityCapabilityRegistry.registerCapability(key, capabilityRecord);
     }
 
@@ -119,48 +119,72 @@ public class CapabilityUtils {
     }
 
     /**
-     * 请通过该方法获取玩家的capability
-     * @param player 目标玩家
-     * @param key capability key
-     * @param clazz 应返回的capability类型
+     * 请通过该方法获取capability
+     * @param entity 目标实体，类型 {@code <E extends Entity>}
+     * @param key capability的唯一名
+     * @param clazz 应返回的capability类型，若为null则会返回 {@code ICapabilitySync<E>}
      * @return 返回对应的capability
      */
+    @SuppressWarnings("unchecked")
     @Nullable
-    public static <T extends ICapabilitySync> T getPlayerCapability(Player player, ResourceLocation key, Class<T> clazz) {
-        if(player == null) return null;
-        ICapabilitySync capabilitySync = player.getCapability(
-                PlayerCapabilityRegistry.getCapabilityMap().get(key).capability()
-        ).resolve().orElse(null);
-        if(capabilitySync == null) return null;
+    public static <E extends Entity, T extends ICapabilitySync<E>> T getEntityCapability(E entity, ResourceLocation key, @Nullable Class<T> clazz) {
         try {
+            ICapabilitySync<?> capabilitySync = entity.getCapability(
+                    EntityCapabilityRegistry.getCapabilityMap().get(key).capability()
+            ).resolve().orElse(null);
+            if(clazz == null) return (T) capabilitySync;
             if(clazz.isInstance(capabilitySync))
                 return clazz.cast(capabilitySync);
             else return null;
-        }catch(ClassCastException e){
+        }catch(Exception e){
             return null;
         }
     }
 
     /**
-     * 请通过该方法获取实体的capability
-     * @param entity 目标实体
-     * @param key capability key
-     * @param clazz 应返回的capability类型
+     * 请通过该方法获取capability
+     * @param entity 目标实体，类型 {@code <E extends Entity>}
+     * @param key capability的唯一名
+     * @param clazz 应返回的capability类型，若为null则会返回 {@code ICapabilitySync<E>}
      * @return 返回对应的capability
      */
+    @SuppressWarnings("unchecked")
     @Nullable
-    public static <T extends ICapabilitySync> T getEntityCapability(Entity entity, ResourceLocation key, Class<T> clazz) {
-        if(entity == null) return null;
-        ICapabilitySync capabilitySync = entity.getCapability(
-                EntityCapabilityRegistry.getCapabilityMap().get(key).capability()
-        ).resolve().orElse(null);
-        if(capabilitySync == null) return null;
+    public static <E extends Player, T extends ICapabilitySync<E>> T getPlayerCapability(E entity, ResourceLocation key, @Nullable Class<T> clazz) {
         try {
+            ICapabilitySync<?> capabilitySync = entity.getCapability(
+                    PlayerCapabilityRegistry.getCapabilityMap().get(key).capability()
+            ).resolve().orElse(null);
+            if(clazz == null) return (T) capabilitySync;
             if(clazz.isInstance(capabilitySync))
                 return clazz.cast(capabilitySync);
             else return null;
-        }catch(ClassCastException e){
+        }catch(Exception e){
             return null;
         }
+    }
+
+    /**
+     * 获取一个未转换类型的Cap
+     * @param entity 目标
+     * @param key cap的唯一名
+     * @return 未转换类型的cap
+     */
+    @Nullable
+    public static ICapabilitySync<?> getCapability(Entity entity, ResourceLocation key) {
+        if(entity == null) return null;
+        try {
+            if(entity instanceof Player) {
+                return entity.getCapability(
+                        PlayerCapabilityRegistry.getCapabilityMap().get(key).capability()
+                ).resolve().orElse(null);
+            }
+            return entity.getCapability(
+                    EntityCapabilityRegistry.getCapabilityMap().get(key).capability()
+            ).resolve().orElse(null);
+        }catch(Exception e){
+            return null;
+        }
+
     }
 }

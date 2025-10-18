@@ -46,7 +46,7 @@ public class PlayerCapabilityHandler {
         if(event.getObject() instanceof Player) {
             PlayerCapabilityRegistry.getCapabilityMap().forEach((key, record) -> {
                 try {
-                    ICapabilitySync capabilitySync = (ICapabilitySync) record.aClass().getDeclaredConstructor().newInstance();
+                    ICapabilitySync<?> capabilitySync = (ICapabilitySync<?>) record.aClass().getDeclaredConstructor().newInstance();
                     event.addCapability(key, new PlayerCapabilityProvider<>(key, capabilitySync));
                 } catch (Exception e) {
                     log.error("Failed to instantiate capability sync class {}. Your capability register is wrong.", record.aClass(), e);

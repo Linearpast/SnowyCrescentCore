@@ -2,6 +2,7 @@ package com.linearpast.sccore.capability.data.player;
 
 import com.linearpast.sccore.capability.data.ICapabilitySync;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.player.Player;
 
 import java.util.UUID;
 
@@ -23,7 +24,7 @@ import java.util.UUID;
  * </pre>
  *
  */
-public abstract class SimplePlayerCapabilitySync implements ICapabilitySync {
+public abstract class SimplePlayerCapabilitySync implements ICapabilitySync<Player> {
     public static final String OwnerUUID = "OwnerUUID";
 
     private boolean dirty;
@@ -55,9 +56,10 @@ public abstract class SimplePlayerCapabilitySync implements ICapabilitySync {
      * @param listenDone 最后是否执行完成方法 {@link ICapabilitySync#onCopyDone()}
      */
     @Override
-    public void copyFrom(ICapabilitySync oldData, boolean listenDone) {
+    public void copyFrom(ICapabilitySync<?> oldData, boolean listenDone) {
         SimplePlayerCapabilitySync data = (SimplePlayerCapabilitySync) oldData;
         this.setOwnerUUID(data.getOwnerUUID());
+        copyFrom(data);
         ICapabilitySync.super.copyFrom(oldData, listenDone);
     }
 
@@ -65,7 +67,7 @@ public abstract class SimplePlayerCapabilitySync implements ICapabilitySync {
      * 触发数据复制时会执行的方法
      * @param oldData 从这个数据中复制到当前实例
      */
-    public abstract void copyFrom(ICapabilitySync oldData);
+    public abstract void copyFrom(ICapabilitySync<?> oldData);
 
     /**
      * 序列化为tag <br>

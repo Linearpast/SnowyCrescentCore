@@ -20,7 +20,7 @@ public class EntityCapabilityRemainder {
     public static void onEntityBeTracked(PlayerEvent.StartTracking event) {
         if (event.getEntity() instanceof ServerPlayer attacker) {
             PlayerCapabilityRegistry.getCapabilityMap().forEach((key, value) -> {
-                ICapabilitySync data = CapabilityUtils.getEntityCapability(event.getTarget(), key, ICapabilitySync.class);
+                ICapabilitySync<?> data = CapabilityUtils.getCapability(event.getTarget(), key);
                 if(data == null) return;
                 data.sendToClient(attacker);
             });
@@ -38,7 +38,7 @@ public class EntityCapabilityRemainder {
         if(!entity.level().isClientSide){
             if (entity.tickCount % 20 == 0) {
                 PlayerCapabilityRegistry.getCapabilityMap().forEach((key, value) -> {
-                    ICapabilitySync data = CapabilityUtils.getEntityCapability(entity, key, ICapabilitySync.class);
+                    ICapabilitySync<?> data = CapabilityUtils.getCapability(entity, key);
                     if(data == null) return;
                     if(data.isDirty()) {
                         data.setDirty(false);
@@ -57,11 +57,12 @@ public class EntityCapabilityRemainder {
         Entity entity = event.getEntity();
         if(entity.level().isClientSide) return;
         EntityCapabilityRegistry.getCapabilityMap().forEach((key, value) -> {
-            ICapabilitySync data = CapabilityUtils.getEntityCapability(entity, key, ICapabilitySync.class);
+            ICapabilitySync<Entity> data = CapabilityUtils.getEntityCapability(entity, key, null);
             if(data == null) return;
-            if(data instanceof SimpleEntityCapabilitySync capabilitySync){
+            if(data instanceof SimpleEntityCapabilitySync<?> capabilitySync){
                 capabilitySync.setId(entity.getId());
             }
+            data.attachInit(entity);
             data.setDirty(false);
             data.sendToClient();
         });

@@ -18,7 +18,7 @@ import java.util.Optional;
  * 继承SimpleEntityCapabilitySync意味着自动托管一个id的同步 <br>
  * 实现的IsheepData仅含有属性value的getter和setter <br>
  */
-public class SheepDataCapability extends SimpleEntityCapabilitySync implements ISheepData {
+public class SheepDataCapability extends SimpleEntityCapabilitySync<Sheep> implements ISheepData {
     //代表cap的key，注册、获取时都需要它
     public static final ResourceLocation key = new ResourceLocation(SnowyCrescentCore.MODID, "sheep_data");
 
@@ -59,7 +59,7 @@ public class SheepDataCapability extends SimpleEntityCapabilitySync implements I
 
     //从旧实例中复制数据到新实例的方法
     @Override
-    public void copyFrom(ICapabilitySync oldData) {
+    public void copyFrom(ICapabilitySync<?> oldData) {
         SheepDataCapability data = (SheepDataCapability) oldData;
         this.value = data.getValue();
     }
@@ -82,7 +82,7 @@ public class SheepDataCapability extends SimpleEntityCapabilitySync implements I
 
         //仅用在网络包内部的getCap
         @Override
-        public @Nullable ICapabilitySync getCapability(Sheep entity) {
+        public @Nullable SheepDataCapability getCapability(Sheep entity) {
             return SheepDataCapability.getCapability(entity).orElse(null);
         }
     }
@@ -91,6 +91,13 @@ public class SheepDataCapability extends SimpleEntityCapabilitySync implements I
     @Override
     public SimpleCapabilityPacket<Sheep> getDefaultPacket() {
         return new SheepCapabilityPacket(serializeNBT());
+    }
+
+    //该方法会在cap初始化时调用，比如玩家登录
+    //该例中，当羊加入level时会调用该方法以初始化cap
+    @Override
+    public void attachInit(Sheep entity) {
+
     }
 
     //在其他地方需要用到cap的时候调用这个

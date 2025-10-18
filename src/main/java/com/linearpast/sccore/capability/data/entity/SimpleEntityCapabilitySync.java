@@ -2,6 +2,7 @@ package com.linearpast.sccore.capability.data.entity;
 
 import com.linearpast.sccore.capability.data.ICapabilitySync;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.Entity;
 
 /**
  * 实现时建议手动添加：<br>
@@ -21,7 +22,7 @@ import net.minecraft.nbt.CompoundTag;
  * </pre>
  *
  */
-public abstract class SimpleEntityCapabilitySync implements ICapabilitySync {
+public abstract class SimpleEntityCapabilitySync<T extends Entity> implements ICapabilitySync<T> {
     public static final String Id = "Id";
 
     private boolean dirty;
@@ -57,8 +58,8 @@ public abstract class SimpleEntityCapabilitySync implements ICapabilitySync {
      * @param listenDone 最后是否执行完成方法 {@link ICapabilitySync#onCopyDone()}
      */
     @Override
-    public void copyFrom(ICapabilitySync oldData, boolean listenDone) {
-        SimpleEntityCapabilitySync data = (SimpleEntityCapabilitySync) oldData;
+    public void copyFrom(ICapabilitySync<?> oldData, boolean listenDone) {
+        SimpleEntityCapabilitySync<?> data = (SimpleEntityCapabilitySync<?>) oldData;
         this.setId(data.getId());
         copyFrom(data);
         ICapabilitySync.super.copyFrom(oldData, listenDone);
@@ -68,7 +69,7 @@ public abstract class SimpleEntityCapabilitySync implements ICapabilitySync {
      * 触发数据复制时会执行的方法
      * @param oldData 从这个数据中复制到当前实例
      */
-    public abstract void copyFrom(ICapabilitySync oldData);
+    public abstract void copyFrom(ICapabilitySync<?> oldData);
 
     /**
      * 序列化为tag <br>

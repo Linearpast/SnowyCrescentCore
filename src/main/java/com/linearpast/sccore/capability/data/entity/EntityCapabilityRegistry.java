@@ -46,7 +46,7 @@ public class EntityCapabilityRegistry {
      * @param interfaceClass instance类对应的实例对应的接口类，比如ICapabilitySync.class
      * @param target capability附加的目标类型
      */
-    public record CapabilityRecord<T extends ICapabilitySync>(Class<?> aClass, Capability<T> capability, Class<T> interfaceClass, Class<? extends Entity> target) {
+    public record CapabilityRecord<T extends ICapabilitySync<? extends Entity>>(Class<?> aClass, Capability<T> capability, Class<T> interfaceClass, Class<? extends Entity> target) {
 
     }
 }

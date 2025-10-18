@@ -4,6 +4,7 @@ import com.linearpast.sccore.capability.data.ICapabilitySync;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
 import net.minecraftforge.common.capabilities.AutoRegisterCapability;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilitySerializable;
@@ -16,7 +17,7 @@ import org.jetbrains.annotations.Nullable;
  * @param <C> 继承 {@link ICapabilitySync}
  */
 @AutoRegisterCapability
-public class EntityCapabilityProvider<C extends ICapabilitySync> implements ICapabilitySerializable<CompoundTag> {
+public class EntityCapabilityProvider<C extends ICapabilitySync<? extends Entity>> implements ICapabilitySerializable<CompoundTag> {
     private final C instance;
     private final ResourceLocation resourceLocation;
     public EntityCapabilityProvider(ResourceLocation resourceLocation, C instance) {

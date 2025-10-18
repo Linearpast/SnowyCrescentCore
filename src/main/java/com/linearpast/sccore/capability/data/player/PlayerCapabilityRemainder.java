@@ -25,8 +25,8 @@ public class PlayerCapabilityRemainder {
             Player original = event.getOriginal();
             original.reviveCaps();
             PlayerCapabilityRegistry.getCapabilityMap().forEach((key, value) -> {
-                ICapabilitySync originData = CapabilityUtils.getPlayerCapability(original, key, ICapabilitySync.class);
-                ICapabilitySync newData = CapabilityUtils.getPlayerCapability(newPlayer, key, ICapabilitySync.class);
+                ICapabilitySync<?> originData = CapabilityUtils.getCapability(original, key);
+                ICapabilitySync<?> newData = CapabilityUtils.getCapability(newPlayer, key);
                 if(originData != null && newData != null) {
                     newData.copyFrom(originData, true);
                     newData.sendToClient();
@@ -43,7 +43,7 @@ public class PlayerCapabilityRemainder {
     public static void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
         if(event.getEntity() instanceof ServerPlayer newPlayer){
             PlayerCapabilityRegistry.getCapabilityMap().forEach((key, value) -> {
-                ICapabilitySync data = CapabilityUtils.getPlayerCapability(newPlayer, key, ICapabilitySync.class);
+                ICapabilitySync<?> data = CapabilityUtils.getCapability(newPlayer, key);
                 if(data == null) return;
                 data.sendToClient(newPlayer);
             });
@@ -59,7 +59,7 @@ public class PlayerCapabilityRemainder {
     public static void onEntityBeTracked(PlayerEvent.StartTracking event) {
         if (event.getTarget() instanceof Player target && event.getEntity() instanceof ServerPlayer attacker) {
             PlayerCapabilityRegistry.getCapabilityMap().forEach((key, value) -> {
-                ICapabilitySync data = CapabilityUtils.getPlayerCapability(target, key, ICapabilitySync.class);
+                ICapabilitySync<?> data = CapabilityUtils.getCapability(target, key);
                 if(data == null) return;
                 data.sendToClient(attacker);
             });
@@ -74,7 +74,7 @@ public class PlayerCapabilityRemainder {
     public static void capabilitySync(TickEvent.PlayerTickEvent event) {
         if(!event.player.level().isClientSide){
             PlayerCapabilityRegistry.getCapabilityMap().forEach((key, value) -> {
-                ICapabilitySync data = CapabilityUtils.getPlayerCapability(event.player, key, ICapabilitySync.class);
+                ICapabilitySync<?> data = CapabilityUtils.getCapability(event.player, key);
                 if(data == null) return;
                 if(data.isDirty()) {
                     data.setDirty(false);
@@ -94,11 +94,12 @@ public class PlayerCapabilityRemainder {
         Player player = event.getEntity();
         if(!(player instanceof ServerPlayer serverPlayer)) return;
         PlayerCapabilityRegistry.getCapabilityMap().forEach((key, value) -> {
-            ICapabilitySync data = CapabilityUtils.getPlayerCapability(player, key, ICapabilitySync.class);
+            ICapabilitySync<Player> data = CapabilityUtils.getPlayerCapability(player, key, null);
             if(data == null) return;
             if(data instanceof SimplePlayerCapabilitySync capabilitySync) {
                 capabilitySync.setOwnerUUID(serverPlayer.getUUID());
             }
+            data.attachInit(serverPlayer);
             data.setDirty(false);
             data.sendToClient();
         });
@@ -106,7 +107,7 @@ public class PlayerCapabilityRemainder {
                 serverPlayers -> serverPlayers.forEach(p -> {
                     if(!p.getUUID().equals(serverPlayer.getUUID())) {
                         PlayerCapabilityRegistry.getCapabilityMap().forEach((key, value) -> {
-                            ICapabilitySync data = CapabilityUtils.getPlayerCapability(player, key, ICapabilitySync.class);
+                            ICapabilitySync<?> data = CapabilityUtils.getCapability(player, key);
                             if(data == null) return;
                             data.sendToClient(serverPlayer);
                         });

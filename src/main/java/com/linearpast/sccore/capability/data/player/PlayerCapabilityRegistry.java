@@ -2,6 +2,7 @@ package com.linearpast.sccore.capability.data.player;
 
 import com.linearpast.sccore.capability.data.ICapabilitySync;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.capabilities.Capability;
 
 import java.util.HashMap;
@@ -40,5 +41,5 @@ public class PlayerCapabilityRegistry {
      * @param capability 一般情况下不需要初始化它，默认：CapabilityManager.get(new CapabilityToken<>(){})
      * @param interfaceClass instance实例对应的接口类，比如ICapabilitySync.class
      */
-    public record CapabilityRecord<T extends ICapabilitySync>(Class<?> aClass, Capability<T> capability, Class<T> interfaceClass) {    }
+    public record CapabilityRecord<T extends ICapabilitySync<? extends Player>>(Class<?> aClass, Capability<T> capability, Class<T> interfaceClass) {    }
 }

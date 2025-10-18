@@ -45,7 +45,7 @@ public class EntityCapabilityHandler {
             EntityCapabilityRegistry.getCapabilityMap().forEach((key, record) -> {
                 if(record.target().isInstance(entity)) {
                     try {
-                        ICapabilitySync capabilitySync = (ICapabilitySync) record.aClass().getDeclaredConstructor().newInstance();
+                        ICapabilitySync<?> capabilitySync = (ICapabilitySync<?>) record.aClass().getDeclaredConstructor().newInstance();
                         event.addCapability(key, new EntityCapabilityProvider<>(key, capabilitySync));
                     } catch (Exception e) {
                         log.error("Failed to instantiate capability sync class {}. Your capability register is wrong.", record.aClass(), e);

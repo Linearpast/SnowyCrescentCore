@@ -12,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 @AutoRegisterCapability
-public class PlayerCapabilityProvider<C extends ICapabilitySync> implements ICapabilitySerializable<CompoundTag> {
+public class PlayerCapabilityProvider<C extends ICapabilitySync<?>> implements ICapabilitySerializable<CompoundTag> {
     private final C instance;
     private final ResourceLocation resourceLocation;
     public PlayerCapabilityProvider(ResourceLocation resourceLocation, C instance) {
