@@ -40,7 +40,7 @@ public class CameraModify {
                     float camPitch = animationData.getCamPitch();
                     float camRoll = animationData.getCamRoll();
                     return !(camYaw == camPitch && camPitch == camRoll && camYaw == 0);
-                });
+                }, null);
 
                 if(animation != null) {
                     targetPitch = animation.getCamPitch();
@@ -79,7 +79,8 @@ public class CameraModify {
             LocalPlayer player = minecraft.player;
 
             AnimationData animation = AnimationUtils.getPredicateAnimationData(animationData ->
-                    !animationData.getCamPosOffset().multiply(1,0,1).equals(Vec3.ZERO)
+                    !animationData.getCamPosOffset().multiply(1,0,1).equals(Vec3.ZERO),
+                    null
             );
             float var3 = Minecraft.getInstance().getDeltaFrameTime();
             float var4 = var3 / 5.0F;

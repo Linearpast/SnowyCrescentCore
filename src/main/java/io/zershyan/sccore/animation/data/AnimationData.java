@@ -157,7 +157,10 @@ public class AnimationData implements INBTSerializable<CompoundTag> {
                 this.camRoll = -90.0f;
                 this.camYaw = -90.0f;
             }
-            case BACK -> this.camPitch = 90.0f;
+            case BACK -> {
+                this.camPitch = 0.0f;
+                this.camYaw = 180.0f;
+            }
         }
         return this;
     }

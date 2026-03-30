@@ -13,7 +13,6 @@ import io.zershyan.sccore.animation.capability.AnimationDataCapability;
 import io.zershyan.sccore.animation.capability.RawAnimationDataCapability;
 import io.zershyan.sccore.animation.capability.inter.IAnimationCapability;
 import io.zershyan.sccore.animation.data.AnimationData;
-import io.zershyan.sccore.animation.data.GenericAnimationData;
 import io.zershyan.sccore.animation.mixin.IMixinKeyframeAnimationPlayer;
 import io.zershyan.sccore.animation.register.AnimationRegistry;
 import io.zershyan.sccore.animation.service.AnimationService;
@@ -192,20 +191,20 @@ public class AnimationUtils {
     }
 
     /**
-     * Get the LyingType when there are animations which playing on player. <br>
+     * Get the LyingType when there are animations that playing on player. <br>
      * And It will return the first which be found.
      * @param player Target player
-     * @return The first LyingType it find.
+     * @return The first LyingType it finds.
      */
     @Nullable
-    public static GenericAnimationData.LyingType getSideView(Player player) {
+    public static AnimationData getLyingViewDefaultSide(Player player, @Nullable AnimationData.LyingType searchType) {
         return IAnimationService.ANIMATION_RUNNER.testLoadedAndCall(() -> {
             IAnimationCapability data = AnimationDataCapability.getCapability(player).orElse(null);
             RawAnimationDataCapability rawData = RawAnimationDataCapability.getCapability(player).orElse(null);
             if(data == null) return null;
             if(rawData == null) return null;
 
-            Map.Entry<Integer, AnimationData.LyingType> animations = null;
+            Map.Entry<Integer, AnimationData> animations = null;
             ArrayList<ResourceLocation> resourceLocations = new ArrayList<>();
             resourceLocations.addAll(data.getAnimations().values());
             resourceLocations.addAll(rawData.getAnimations().values());
@@ -214,12 +213,10 @@ public class AnimationUtils {
                 if(animation == null) return null;
                 AnimationData.LyingType type = animation.getLyingType();
                 if(type == null) continue;
-                switch (type) {
-                    case FRONT,BACK -> {}
-                    case LEFT,RIGHT -> {
-                        if(animations == null || animations.getKey() < animation.getCamComputePriority()) {
-                            animations = new AbstractMap.SimpleEntry<>(animation.getCamComputePriority(), type);
-                        }
+                boolean flag = ((searchType == null) && (type == AnimationData.LyingType.LEFT || type == AnimationData.LyingType.RIGHT));
+                if(flag || (searchType != null && type == searchType)) {
+                    if(animations == null || animations.getKey() < animation.getCamComputePriority()) {
+                        animations = new AbstractMap.SimpleEntry<>(animation.getCamComputePriority(), animation);
                     }
                 }
             }
@@ -229,9 +226,10 @@ public class AnimationUtils {
 
     @Nullable
     @OnlyIn(Dist.CLIENT)
-    public static AnimationData getPredicateAnimationData(Predicate<AnimationData> predicate) {
+    public static AnimationData getPredicateAnimationData(Predicate<AnimationData> predicate, @Nullable AbstractClientPlayer localPlayer) {
         return IAnimationService.ANIMATION_RUNNER.testLoadedAndCall(() -> {
-            LocalPlayer player = Minecraft.getInstance().player;
+            AbstractClientPlayer player = localPlayer;
+            if(player == null) player = Minecraft.getInstance().player;
             if(player == null) return null;
             IAnimationCapability data = AnimationDataCapability.getCapability(player).orElse(null);
             RawAnimationDataCapability rawData = RawAnimationDataCapability.getCapability(player).orElse(null);
