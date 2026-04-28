@@ -8,7 +8,7 @@ import io.zershyan.sccore.animation.network.toclient.RawAnimationCapabilityPacke
 import io.zershyan.sccore.capability.CapabilityUtils;
 import io.zershyan.sccore.capability.data.player.PlayerCapabilityRegistry;
 import io.zershyan.sccore.capability.network.CapabilityChannel;
-import io.zershyan.sccore.core.ModChannel;
+import io.zershyan.sccore.common.ModChannel;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.common.capabilities.CapabilityToken;
 

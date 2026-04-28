@@ -14,7 +14,7 @@ import io.zershyan.sccore.animation.network.toclient.AnimationJsonPacket;
 import io.zershyan.sccore.animation.register.AnimationRegistry;
 import io.zershyan.sccore.animation.register.RawAnimationRegistry;
 import io.zershyan.sccore.animation.utils.FileUtils;
-import io.zershyan.sccore.core.ModChannel;
+import io.zershyan.sccore.common.ModChannel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;

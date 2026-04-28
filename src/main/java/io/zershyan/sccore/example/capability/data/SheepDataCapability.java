@@ -125,7 +125,7 @@ public class SheepDataCapability extends SimpleEntityCapabilitySync<Sheep> imple
 
     /**
      * It is not necessary. <br>
-     * Call this when capability is needed in other places <br>
+     * Call it when capability is needed in other places <br>
      * The purpose is to simplify the method of capability get
      * @param sheep Target
      * @return Optional capability

@@ -67,17 +67,38 @@ public class AnimationRideEntity extends Entity {
     protected void defineSynchedData() {}
 
     @Override
-    protected void readAdditionalSaveData(@NotNull CompoundTag pCompound) {}
+    protected void readAdditionalSaveData(@NotNull CompoundTag pCompound) {
+//        animationPair.clear();
+//        CompoundTag animationPairTag = pCompound.getCompound("animationPair");
+//        for (String key : animationPairTag.getAllKeys()) {
+//            animationPair.put(ResourceLocation.tryParse(key), animationPairTag.getUUID(key));
+//        }
+//        animation.deserializeNBT(pCompound.getCompound("animationData"));
+//        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+//        if(server != null) {
+//            player = server.getPlayerList().getPlayer(pCompound.getUUID("owner"));
+//        } else player = null;
+//        layer = ResourceLocation.tryParse(pCompound.getString("layer"));
+    }
 
     @Override
-    protected void addAdditionalSaveData(@NotNull CompoundTag pCompound) {}
+    protected void addAdditionalSaveData(@NotNull CompoundTag pCompound) {
+//        CompoundTag animationPairTag = new CompoundTag();
+//        animationPair.forEach((key, value) ->
+//                animationPairTag.putUUID(key.toString(), value)
+//        );
+//        pCompound.put("animationPair", animationPairTag);
+//        pCompound.put("animationData", animation.serializeNBT());
+//        pCompound.putUUID("owner", player.getUUID());
+//        pCompound.putString("layer", layer.toString());
+    }
 
     @Override
     public void tick() {
         super.tick();
         if(!this.level().isClientSide) {
             Ride ride = animation == null ? null : animation.getRide();
-            if(!this.getPassengers().contains(player) || (ride != null && ride.getExistTick() > 0 && this.tickCount >= ride.getExistTick())) {
+            if(player == null || !this.getPassengers().contains(player) || (ride != null && ride.getExistTick() > 0 && this.tickCount >= ride.getExistTick())) {
                 this.remove(RemovalReason.DISCARDED);
             }
         }

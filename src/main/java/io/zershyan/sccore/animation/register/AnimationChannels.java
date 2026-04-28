@@ -5,7 +5,7 @@ import io.zershyan.sccore.animation.network.toclient.AnimationClientStatusPacket
 import io.zershyan.sccore.animation.network.toclient.AnimationJsonPacket;
 import io.zershyan.sccore.animation.network.toclient.SyncAnimationPacket;
 import io.zershyan.sccore.animation.network.toserver.*;
-import io.zershyan.sccore.core.ModChannel;
+import io.zershyan.sccore.common.ModChannel;
 import net.minecraftforge.network.NetworkDirection;
 
 public class AnimationChannels {

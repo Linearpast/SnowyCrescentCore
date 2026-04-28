@@ -92,8 +92,8 @@ public class ModAnimation {
 
         //Try to play animation
 //        forgeBus.addListener(ExamplePlayerAttackEvent::onPlayerAttack);
-        forgeBus.addListener(ExamplePlayerAttackEvent::rawAnimationAttack);
         if(FMLEnvironment.dist == Dist.CLIENT){
+            forgeBus.addListener(ExamplePlayerAttackEvent::rawAnimationAttack);
 //            forgeBus.addListener(ExamplePlayerAttackEvent::onInputEvent);
             forgeBus.addListener(ModAnimation::onRawAnimationRegister);
         }

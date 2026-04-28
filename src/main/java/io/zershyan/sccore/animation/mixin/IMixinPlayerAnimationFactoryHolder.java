@@ -5,8 +5,10 @@ import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Set;
+
 public interface IMixinPlayerAnimationFactoryHolder {
     record DataHolder(@Nullable ResourceLocation id, int priority, @NotNull IAnimation animation) {}
 
-    void sccore$clearAnimations();
+    void sccore$clearAnimations(Set<ResourceLocation> ids);
 }

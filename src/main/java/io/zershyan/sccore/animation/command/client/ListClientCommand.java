@@ -4,7 +4,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import io.zershyan.sccore.animation.command.ListServerCommand;
 import io.zershyan.sccore.animation.register.RawAnimationRegistry;
-import io.zershyan.sccore.core.datagen.ModLang;
+import io.zershyan.sccore.common.datagen.ModLang;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;

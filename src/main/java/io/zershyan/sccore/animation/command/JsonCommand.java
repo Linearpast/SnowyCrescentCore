@@ -5,7 +5,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import io.zershyan.sccore.SnowyCrescentCore;
 import io.zershyan.sccore.animation.helper.AnimationJsonHelper;
-import io.zershyan.sccore.core.datagen.ModLang;
+import io.zershyan.sccore.common.datagen.ModLang;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;

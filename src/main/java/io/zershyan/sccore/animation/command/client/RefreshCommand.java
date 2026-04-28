@@ -7,7 +7,7 @@ import dev.kosmx.playerAnim.minecraftApi.PlayerAnimationAccess;
 import io.zershyan.sccore.SnowyCrescentCore;
 import io.zershyan.sccore.animation.AnimationApi;
 import io.zershyan.sccore.animation.register.AnimationRegistry;
-import io.zershyan.sccore.core.datagen.ModLang;
+import io.zershyan.sccore.common.datagen.ModLang;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;

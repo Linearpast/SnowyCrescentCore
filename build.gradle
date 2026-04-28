@@ -115,6 +115,9 @@ repositories {
         name = "Illusive Soulworks maven"
         url = "https://maven.theillusivec4.top/"
     }
+    maven {
+        url "https://maven.blamejared.com"
+    }
 }
 
 jarJar.enable()
@@ -128,12 +131,21 @@ dependencies {
         jarJar.ranged(it, "[0.4.1,)")
     })
 
-    implementation fg.deobf("dev.kosmx.player-anim:player-animation-lib-forge:1.0.2-rc1+1.20")
-    implementation fg.deobf("io.github.kosmx.bendy-lib:bendy-lib-forge:4.0.0")
+    //Patchouli
+    //implementation fg.deobf("vazkii.patchouli:Patchouli:1.20.1-85-FORGE")
 
-//    implementation fg.deobf("curse.maven:cloth-config-348521:5729105")
-//    implementation fg.deobf("curse.maven:better-combat-by-daedelus-639842:5625757")
-//    implementation fg.deobf("curse.maven:freecam-by-zergatul-618947:5402097")
+    //JEI
+    implementation fg.deobf("curse.maven:jei-238222:6600311")
+
+    //player animator
+    compileOnly fg.deobf("dev.kosmx.player-anim:player-animation-lib-forge:1.0.2-rc1+1.20")
+    compileOnly fg.deobf("curse.maven:timeless-and-classics-zero-1028108:7745481")
+    compileOnly fg.deobf("io.github.kosmx.bendy-lib:bendy-lib-forge:4.0.0")
+
+    if(!project.gradle.startParameter.taskNames.any { "runServer" in it }) {
+        runtimeOnly fg.deobf("curse.maven:freecam-by-zergatul-618947:5402097")
+        runtimeOnly fg.deobf("curse.maven:jade-324717:6855440")
+    }
 }
 
 tasks.named('processResources', ProcessResources).configure {

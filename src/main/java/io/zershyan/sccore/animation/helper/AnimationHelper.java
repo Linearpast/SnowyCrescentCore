@@ -4,7 +4,7 @@ import io.zershyan.sccore.animation.AnimationApi;
 import io.zershyan.sccore.animation.data.AnimationData;
 import io.zershyan.sccore.animation.service.IAnimationService;
 import io.zershyan.sccore.animation.utils.ApiBack;
-import io.zershyan.sccore.core.IModLazyRun;
+import io.zershyan.sccore.common.IModLazyRun;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.AbstractClientPlayer;

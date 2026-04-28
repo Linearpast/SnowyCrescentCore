@@ -1,7 +1,7 @@
 package io.zershyan.sccore.capability.data;
 
 import io.zershyan.sccore.capability.network.SimpleCapabilityPacket;
-import io.zershyan.sccore.core.ModChannel;
+import io.zershyan.sccore.common.ModChannel;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;

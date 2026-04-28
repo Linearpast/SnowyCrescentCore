@@ -3,9 +3,9 @@ package io.zershyan.sccore;
 
 import io.zershyan.sccore.animation.service.IAnimationService;
 import io.zershyan.sccore.capability.CapabilityUtils;
-import io.zershyan.sccore.core.ModChannel;
-import io.zershyan.sccore.core.ModCommands;
-import io.zershyan.sccore.core.configs.ModConfigs;
+import io.zershyan.sccore.common.ModChannel;
+import io.zershyan.sccore.common.ModCommands;
+import io.zershyan.sccore.common.configs.ModConfigs;
 import io.zershyan.sccore.example.animation.ModAnimation;
 import io.zershyan.sccore.example.capability.ModCapability;
 import net.minecraftforge.common.MinecraftForge;
@@ -41,6 +41,8 @@ public class SnowyCrescentCore {
             ModCapability.register();
             ModCapability.addListenerToEvent(forgeBus);
             ModAnimation.register(forgeBus, modBus);
+            //You can try it
+            //ModPatchouli.register(forgeBus, modBus);
         }
     }
 }

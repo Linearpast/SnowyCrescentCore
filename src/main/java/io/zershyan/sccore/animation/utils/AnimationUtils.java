@@ -18,7 +18,7 @@ import io.zershyan.sccore.animation.register.AnimationRegistry;
 import io.zershyan.sccore.animation.service.AnimationService;
 import io.zershyan.sccore.animation.service.IAnimationService;
 import io.zershyan.sccore.animation.service.RawAnimationService;
-import io.zershyan.sccore.core.datagen.ModLang;
+import io.zershyan.sccore.common.datagen.ModLang;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;

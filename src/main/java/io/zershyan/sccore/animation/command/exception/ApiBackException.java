@@ -1,7 +1,7 @@
 package io.zershyan.sccore.animation.command.exception;
 
 import io.zershyan.sccore.animation.utils.ApiBack;
-import io.zershyan.sccore.core.datagen.ModLang;
+import io.zershyan.sccore.common.datagen.ModLang;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 

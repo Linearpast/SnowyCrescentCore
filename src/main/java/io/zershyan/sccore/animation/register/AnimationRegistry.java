@@ -104,7 +104,7 @@ public class AnimationRegistry {
                 case ANIM_CACHE_CLEAR -> animationsCache.clear();
                 case LAYER_CACHE_CLEAR -> {
                     ((IMixinPlayerAnimationFactoryHolder)(PlayerAnimationFactory.ANIMATION_DATA_FACTORY))
-                            .sccore$clearAnimations();
+                            .sccore$clearAnimations(layersCache.keySet());
                     layersCache.clear();
                 }
                 case ANIM_REGISTER -> {
@@ -143,6 +143,11 @@ public class AnimationRegistry {
             return new ModifierLayer<>();
         }
 
+        private static KeyframeAnimation getAnimationOfPair(Pair<Integer, IAnimation> pair) {
+            return Optional.ofNullable((KeyframeAnimationPlayer) ((ModifierLayer<?>) pair.getRight()).getAnimation())
+                    .map(KeyframeAnimationPlayer::getData).orElse(null);
+        }
+
         @SuppressWarnings({"JavaReflectionMemberAccess", "UnstableApiUsage", "unchecked"})
         private static void reflectAnimationCore(AbstractClientPlayer player) {
             try {
@@ -161,10 +166,8 @@ public class AnimationRegistry {
                 for (Pair<Integer, IAnimation> oldAnimationPair : List.copyOf(oldArrayList)) {
                     for (Pair<Integer, IAnimation> newAnimationPair : List.copyOf(newArrayList)) {
                         if(Objects.equals(oldAnimationPair.getLeft(), newAnimationPair.getLeft())) {
-                            KeyframeAnimation oldData = Optional.ofNullable((KeyframeAnimationPlayer) ((ModifierLayer<?>) oldAnimationPair.getRight()).getAnimation())
-                                    .map(KeyframeAnimationPlayer::getData).orElse(null);
-                            KeyframeAnimation newData = Optional.ofNullable((KeyframeAnimationPlayer) ((ModifierLayer<?>) newAnimationPair.getRight()).getAnimation())
-                                    .map(KeyframeAnimationPlayer::getData).orElse(null);
+                            KeyframeAnimation oldData = getAnimationOfPair(oldAnimationPair);
+                            KeyframeAnimation newData = getAnimationOfPair(newAnimationPair);
                             if(Objects.equals(oldData, newData)) oldArrayList.remove(oldAnimationPair);
                         }
                     }

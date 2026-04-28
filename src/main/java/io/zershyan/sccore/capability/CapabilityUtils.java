@@ -7,7 +7,7 @@ import io.zershyan.sccore.capability.data.player.PlayerCapabilityHandler;
 import io.zershyan.sccore.capability.data.player.PlayerCapabilityRegistry;
 import io.zershyan.sccore.capability.network.CapabilityChannel;
 import io.zershyan.sccore.capability.network.ICapabilityPacket;
-import io.zershyan.sccore.core.ModChannel;
+import io.zershyan.sccore.common.ModChannel;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;

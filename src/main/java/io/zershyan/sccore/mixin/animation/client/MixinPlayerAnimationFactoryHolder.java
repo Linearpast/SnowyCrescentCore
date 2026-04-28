@@ -13,10 +13,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 
 @Mixin(PlayerAnimationFactory.FactoryHolder.class)
@@ -24,6 +21,10 @@ public class MixinPlayerAnimationFactoryHolder implements IMixinPlayerAnimationF
     @Unique
     @Final
     private static List<Function<AbstractClientPlayer, DataHolder>> sccore$factories = new ArrayList<>();
+
+    @Unique
+    @Final
+    private static Map<ResourceLocation, Function<AbstractClientPlayer, DataHolder>> sccore$cache = new HashMap<>();
 
     @Inject(
             method = "prepareAnimations",
@@ -51,12 +52,21 @@ public class MixinPlayerAnimationFactoryHolder implements IMixinPlayerAnimationF
             remap = false
     )
     private void registerFactory(ResourceLocation id, int priority, PlayerAnimationFactory factory, CallbackInfo ci) {
-        sccore$factories.add(player -> Optional.ofNullable(factory.invoke(player)).map(animation -> new DataHolder(id, priority, animation)).orElse(null));
+        Function<AbstractClientPlayer, DataHolder> holderFunction = player -> Optional.ofNullable(
+                factory.invoke(player)
+        ).map(animation -> new DataHolder(
+                id, priority, animation
+        )).orElse(null);
+        sccore$factories.add(holderFunction);
+        sccore$cache.put(id, holderFunction);
         ci.cancel();
     }
 
     @Unique
-    public void sccore$clearAnimations() {
-        sccore$factories.clear();
+    public void sccore$clearAnimations(Set<ResourceLocation> ids) {
+        for (ResourceLocation id : ids) {
+            Function<AbstractClientPlayer, DataHolder> remove = sccore$cache.remove(id);
+            if (remove != null) sccore$factories.remove(remove);
+        }
     }
 }
