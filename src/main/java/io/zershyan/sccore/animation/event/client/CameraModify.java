@@ -10,6 +10,7 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -58,9 +59,9 @@ public class CameraModify {
                 var4 = 0.0022857143F;
             }
 
-            currentPitch = MathHelper.lerp(var4, currentPitch, targetPitch);
-            currentYaw = MathHelper.lerp(var4, currentYaw, targetYaw);
-            currentRoll = MathHelper.lerp(var4, currentRoll, targetRoll);
+            currentPitch = lerp(var4, currentPitch, targetPitch);
+            currentYaw = lerp(var4, currentYaw, targetYaw);
+            currentRoll = lerp(var4, currentRoll, targetRoll);
             event.setPitch(event.getPitch() + currentPitch);
             event.setYaw(event.getYaw() + currentYaw);
             event.setRoll(event.getRoll() + currentRoll);
@@ -83,9 +84,9 @@ public class CameraModify {
                     null
             );
             float var3 = Minecraft.getInstance().getDeltaFrameTime();
-            float var4 = var3 / 5.0F;
-            if (var4 == 0.0F) {
-                var4 = 0.0022857143F;
+            float delta = var3 / 5.0F;
+            if (delta == 0.0F) {
+                delta = 0.0022857143F;
             }
 
             targetOffset = Vec3.ZERO;
@@ -115,14 +116,40 @@ public class CameraModify {
             }
 
             currentOffset = new Vec3(
-                    MathHelper.lerp(var4, currentOffset.x, targetOffset.x),
-                    MathHelper.lerp(var4, currentOffset.y, targetOffset.y),
-                    MathHelper.lerp(var4, currentOffset.z, targetOffset.z)
+                    lerp(delta, currentOffset.x, targetOffset.x),
+                    lerp(delta, currentOffset.y, targetOffset.y),
+                    lerp(delta, currentOffset.z, targetOffset.z)
             );
             if(!currentOffset.equals(Vec3.ZERO)) {
                 camera.position = player.getEyePosition(minecraft.getPartialTick())
+                        .add(0, -player.getEyeHeight(), 0)
+                        .add(0, player.getEyeHeight(Pose.STANDING), 0)
                         .add(currentOffset);
             }
         }
+    }
+
+    public static float lerp(float delta, float start, float end) {
+        float value = MathHelper.lerp(delta, start, end);
+        float deltaValue = value - start;
+        float abs = Math.abs(deltaValue);
+        if(Math.abs((value - end)) < 0.0002f) return end;
+        if(0 < abs && abs < 0.0002f) {
+            if(deltaValue > 0) return start + 0.0002f;
+            else return start - 0.0002f;
+        }
+        return value;
+    }
+
+    public static double lerp(double delta, double start, double end) {
+        double value = MathHelper.lerp(delta, start, end);
+        double deltaValue = value - start;
+        double abs = Math.abs(deltaValue);
+        if(Math.abs((value - end)) < 0.0002) return end;
+        if(0 < abs && abs < 0.0002) {
+            if(deltaValue > 0) return start + 0.0002;
+            else return start - 0.0002;
+        }
+        return value;
     }
 }

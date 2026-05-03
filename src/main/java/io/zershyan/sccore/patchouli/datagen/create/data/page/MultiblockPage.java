@@ -39,7 +39,7 @@ public class MultiblockPage extends IPageType {
             object.add("multiblock", multiblockFormat.serialize());
         }
         if(enableVisualize != null) {
-            object.addProperty("enable_visualize", enableVisualize.toString());
+            object.addProperty("enable_visualize", enableVisualize);
         }
         if(text != null) {
             object.addProperty("text", text);

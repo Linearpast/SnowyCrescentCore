@@ -141,16 +141,16 @@ public class PatchouliEntryData implements IPatchouliEntryData {
             object.addProperty("flag", flag.parse());
         }
         if (priority != null) {
-            object.addProperty("priority", priority.toString());
+            object.addProperty("priority", priority);
         }
         if (secret != null) {
-            object.addProperty("secret", secret.toString());
+            object.addProperty("secret", secret);
         }
         if (readByDefault != null) {
-            object.addProperty("readByDefault", readByDefault.toString());
+            object.addProperty("readByDefault", readByDefault);
         }
         if (sortnum != null) {
-            object.addProperty("sortnum", sortnum.toString());
+            object.addProperty("sortnum", sortnum);
         }
         if (!extraRecipeMappings.isEmpty()) {
             JsonObject extraObject = new JsonObject();

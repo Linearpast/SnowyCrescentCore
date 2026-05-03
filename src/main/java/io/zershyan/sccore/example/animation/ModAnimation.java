@@ -33,7 +33,7 @@ public class ModAnimation {
     public static final ResourceLocation WaltzLady = new ResourceLocation(SnowyCrescentCore.MODID, "waltz_lady");
 
     /**
-     * You can register animation layer by event or json <br>
+     * You can register animation layer by event or JSON <br>
      * See wiki (If I'm done.)
      * @param event event
      */
@@ -42,18 +42,18 @@ public class ModAnimation {
     }
 
     /**
-     * You can register animation by event or json <br>
+     * You can register animation by event or JSON <br>
      * See wiki (If I'm done.)
      * @param event event
      */
     public static void onAnimationRegister(AnimationRegisterEvent.Animation event) {
         //You must define corresponding Animation to invite
-//        GenericAnimationData amLTRL = GenericAnimationData.create(AmLyingToRightLying)
-//                .withLyingType(GenericAnimationData.LyingType.RIGHT)
-//                .withName("Lying-to-Right-Lying");
-//        GenericAnimationData amSTL = GenericAnimationData.create(AmStandToLying)
-//                .withName("Stand-to-Lying")
-//                .withLyingType(GenericAnimationData.LyingType.FRONT);
+        GenericAnimationData amLTRL = GenericAnimationData.create(AmLyingToRightLying)
+                .withLyingType(GenericAnimationData.LyingType.RIGHT)
+                .withName("Lying-to-Right-Lying");
+        GenericAnimationData amSTL = GenericAnimationData.create(AmStandToLying)
+                .withName("Stand-to-Lying")
+                .withLyingType(GenericAnimationData.LyingType.FRONT);
         GenericAnimationData waltzGentleman = (GenericAnimationData) GenericAnimationData
                 .create(WaltzGentleman)
                 .withName("Waltz-Gentleman")
@@ -71,6 +71,8 @@ public class ModAnimation {
 //        event.registerAnimation(AmStandToLying, amSTL);
         event.registerAnimation(WaltzGentleman, waltzGentleman);
         event.registerAnimation(WaltzLady, waltzLady);
+        event.registerAnimation(AmStandToLying, amSTL);
+        event.registerAnimation(AmLyingToRightLying, amLTRL);
     }
 
     public static void onRawAnimationRegister(AnimationRegisterEvent.RawAnimation event) {

@@ -69,7 +69,7 @@ public class ImagePage extends IPageType {
             object.addProperty("text", text);
         }
         if(border != null) {
-            object.addProperty("border", border.toString());
+            object.addProperty("border", border);
         }
         return object;
     }
