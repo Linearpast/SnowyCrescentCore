@@ -13,6 +13,7 @@ import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -23,6 +24,11 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 public class AnimationRideEntity extends Entity {
+    public AnimationRideEntity(EntityType<? extends Entity> pEntityType, Level pLevel) {
+        super(pEntityType, pLevel);
+        this.noPhysics = true;
+    }
+
     public AnimationRideEntity(Level pLevel) {
         super(AnimationEntities.RIDE.get(), pLevel);
         this.noPhysics = true;

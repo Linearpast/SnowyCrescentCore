@@ -42,7 +42,7 @@ public class SnowyCrescentCore {
             ModCapability.addListenerToEvent(forgeBus);
             ModAnimation.register(forgeBus, modBus);
             //You can try it
-            //ModPatchouli.register(forgeBus, modBus);
+//            ModPatchouli.register(forgeBus, modBus);
         }
     }
 }

@@ -62,6 +62,10 @@ public class PatchouliCategoryData implements IPatchouliCategoryData {
         return this;
     }
 
+    public ResourceLocation getParent() {
+        return parent;
+    }
+
     @Override
     public @NotNull ResourceLocation getId() {
         return id;

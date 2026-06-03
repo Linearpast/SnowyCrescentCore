@@ -18,9 +18,7 @@ import net.minecraftforge.common.util.FakePlayer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Animation Util. May be you can call it Api.
@@ -95,20 +93,27 @@ public class AnimationService implements IAnimationService<GenericAnimationData,
     }
 
     @Override
-    public @Nullable ResourceLocation getAnimationPlaying(Player player, @Nullable ResourceLocation layer) {
+    public @Nullable ResourceLocation getAnimationPlaying(Player player, ResourceLocation layer) {
         return ANIMATION_RUNNER.testLoadedAndCall(() -> {
             IAnimationCapability data = getCapability(player);
             if(data == null) return null;
-            if(layer == null){
-                for (ResourceLocation value : data.getAnimations().values()) {
-                    if(value != null) return value;
-                }
-            } else if (isAnimationLayerPresent(layer)) {
+            if (isAnimationLayerPresent(layer)) {
                 if(data.isAnimationPresent(layer)){
                     return data.getAnimation(layer);
                 }
             }
             return null;
+        });
+    }
+
+    @Override
+    public List<ResourceLocation> getAnimationPlaying(Player player) {
+        return ANIMATION_RUNNER.testLoadedAndCall(() -> {
+            IAnimationCapability data = getCapability(player);
+            ArrayList<ResourceLocation> result = new ArrayList<>();
+            if(data == null) return result;
+            result.addAll(data.getAnimations().values());
+            return result;
         });
     }
 

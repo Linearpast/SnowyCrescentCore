@@ -16,7 +16,7 @@ public class AnimationEntities {
     public static final DeferredRegister<EntityType<?>> REGISTER = DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, SnowyCrescentCore.MODID);
 
     public static final RegistryObject<EntityType<AnimationRideEntity>> RIDE = register(
-            "animation_ride_entity", EntityType.Builder.<AnimationRideEntity>of((type, world) -> new AnimationRideEntity(world), MobCategory.MISC)
+            "animation_ride_entity", EntityType.Builder.<AnimationRideEntity>of(AnimationRideEntity::new, MobCategory.MISC)
                     .sized(0.0F, 0.0F)
                     .setCustomClientFactory((spawnEntity, world) ->
                             new AnimationRideEntity(world)

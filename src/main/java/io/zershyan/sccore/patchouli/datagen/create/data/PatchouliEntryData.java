@@ -6,6 +6,7 @@ import com.google.gson.JsonParseException;
 import io.zershyan.sccore.patchouli.datagen.create.data.format.ConfigFlags;
 import io.zershyan.sccore.patchouli.datagen.create.data.format.ItemFormat;
 import io.zershyan.sccore.patchouli.datagen.create.data.page.IPageType;
+import io.zershyan.sccore.patchouli.datagen.create.data.page.TextPage;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
@@ -127,6 +128,9 @@ public class PatchouliEntryData implements IPatchouliEntryData {
         object.addProperty("icon", icon.parse());
         if(pages.isEmpty()) {
             throw new JsonParseException("pages is empty");
+        }
+        if(!(pages.get(0) instanceof TextPage)) {
+            throw new JsonParseException("The first page must be TextPage");
         }
         JsonArray pageArray = new JsonArray();
         pages.stream().map(IPageType::serialize).forEach(pageArray::add);

@@ -132,15 +132,14 @@ dependencies {
     })
 
     //Patchouli
-    //implementation fg.deobf("vazkii.patchouli:Patchouli:1.20.1-85-FORGE")
+    compileOnly fg.deobf("vazkii.patchouli:Patchouli:1.20.1-85-FORGE")
 
     //JEI
     implementation fg.deobf("curse.maven:jei-238222:6600311")
 
     //player animator
-    compileOnly fg.deobf("dev.kosmx.player-anim:player-animation-lib-forge:1.0.2-rc1+1.20")
-    compileOnly fg.deobf("curse.maven:timeless-and-classics-zero-1028108:7745481")
-    compileOnly fg.deobf("io.github.kosmx.bendy-lib:bendy-lib-forge:4.0.0")
+    implementation fg.deobf("dev.kosmx.player-anim:player-animation-lib-forge:1.0.2-rc1+1.20")
+    implementation fg.deobf("io.github.kosmx.bendy-lib:bendy-lib-forge:4.0.0")
 
     if(!project.gradle.startParameter.taskNames.any { "runServer" in it }) {
         runtimeOnly fg.deobf("curse.maven:freecam-by-zergatul-618947:5402097")

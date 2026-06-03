@@ -91,7 +91,10 @@ public interface IAnimationService<D extends AnimationData, C extends ICapabilit
      * @return Resource location set
      */
     default Set<ResourceLocation> getLayers() {
-        return Set.copyOf(AnimationRegistry.getLayers().keySet());
+        return AnimationRegistry.getLayers().entrySet().stream()
+                .sorted(Map.Entry.comparingByValue())
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     /**
@@ -236,13 +239,20 @@ public interface IAnimationService<D extends AnimationData, C extends ICapabilit
 
     /**
      * Get animation which is playing now on player. <br>
-     * If layer is null, it will return the first playing animation which can be found.
      * @param player Target player
      * @param layer Target layer
      * @return Playing animation resource location
      */
     @Nullable
-    ResourceLocation getAnimationPlaying(Player player, @Nullable ResourceLocation layer);
+    ResourceLocation getAnimationPlaying(Player player, ResourceLocation layer);
+
+    /**
+     * Get all animation which is playing now on player. <br>
+     * @param player Target player
+     * @return List of playing animation resource location
+     */
+    List<ResourceLocation> getAnimationPlaying(Player player);
+
 
     /**
      * Remove animation.

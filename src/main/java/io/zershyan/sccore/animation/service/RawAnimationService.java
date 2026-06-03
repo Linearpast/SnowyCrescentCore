@@ -18,9 +18,7 @@ import net.minecraftforge.fml.loading.FMLEnvironment;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 public class RawAnimationService implements IAnimationService<RawAnimationData, RawAnimationDataCapability> {
     public static final RawAnimationService INSTANCE = new RawAnimationService();
@@ -73,20 +71,27 @@ public class RawAnimationService implements IAnimationService<RawAnimationData, 
     }
 
     @Override
-    public @Nullable ResourceLocation getAnimationPlaying(Player player, @Nullable ResourceLocation layer) {
+    public @Nullable ResourceLocation getAnimationPlaying(Player player, ResourceLocation layer) {
         return ANIMATION_RUNNER.testLoadedAndCall(() -> {
             RawAnimationDataCapability data = getCapability(player);
             if(data == null) return null;
-            if(layer == null){
-                for (ResourceLocation value : data.getAnimations().values()) {
-                    if(value != null) return value;
-                }
-            } else if (isAnimationLayerPresent(layer)) {
+            if (isAnimationLayerPresent(layer)) {
                 if(data.isAnimationPresent(layer)){
                     return data.getAnimation(layer);
                 }
             }
             return null;
+        });
+    }
+
+    @Override
+    public List<ResourceLocation> getAnimationPlaying(Player player) {
+        return ANIMATION_RUNNER.testLoadedAndCall(() -> {
+            RawAnimationDataCapability data = getCapability(player);
+            ArrayList<ResourceLocation> result = new ArrayList<>();
+            if(data == null) return result;
+            result.addAll(data.getAnimations().values());
+            return result;
         });
     }
 

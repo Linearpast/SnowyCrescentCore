@@ -4,7 +4,6 @@ import dev.kosmx.playerAnim.core.util.MathHelper;
 import io.zershyan.sccore.animation.capability.AnimationDataCapability;
 import io.zershyan.sccore.animation.capability.inter.IAnimationCapability;
 import io.zershyan.sccore.animation.data.AnimationData;
-import io.zershyan.sccore.animation.data.RawAnimationData;
 import io.zershyan.sccore.animation.utils.AnimationUtils;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -91,11 +90,7 @@ public class CameraModify {
 
             targetOffset = Vec3.ZERO;
             if(animation != null) {
-                Vec3 camPosOffset = animation.getCamPosOffset().multiply(1,0,1);
-                AnimationData data = AnimationUtils.getEyeModifierAnimationData(player);
-                if(data instanceof RawAnimationData) {
-                    camPosOffset = camPosOffset.add(0, data.getCamPosOffset().y, 0);
-                }
+                Vec3 camPosOffset = animation.getCamPosOffset();
                 if(animation.isCamPosOffsetRelative()) {
                     float yRot = player.yBodyRotO + (player.yBodyRot - player.yBodyRotO) * minecraft.getPartialTick();
                     float bodyAngel = -(yRot + 90) * ((float)Math.PI / 180F);
@@ -121,8 +116,7 @@ public class CameraModify {
                     lerp(delta, currentOffset.z, targetOffset.z)
             );
             if(!currentOffset.equals(Vec3.ZERO)) {
-                camera.position = player.getEyePosition(minecraft.getPartialTick())
-                        .add(0, -player.getEyeHeight(), 0)
+                camera.position = player.getPosition(minecraft.getPartialTick())
                         .add(0, player.getEyeHeight(Pose.STANDING), 0)
                         .add(currentOffset);
             }

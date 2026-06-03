@@ -17,10 +17,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 public class AnimationHelper {
     private final Player player;
@@ -130,12 +127,20 @@ public class AnimationHelper {
     }
 
     @Nullable
-    public ResourceLocation getAnimationPlaying(@Nullable ResourceLocation layer) {
+    public ResourceLocation getAnimationPlaying(ResourceLocation layer) {
         for (IAnimationService<?, ?> service : AnimationApi.getServiceGetterHelper().getAllServices()) {
             ResourceLocation playing = service.getAnimationPlaying(player, layer);
             if(playing != null) return playing;
         }
         return null;
+    }
+
+    public List<Map.Entry<IAnimationService<?, ?>, List<ResourceLocation>>> getAnimationPlaying() {
+        List<Map.Entry<IAnimationService<?, ?>, List<ResourceLocation>>> result = new ArrayList<>();
+        for (IAnimationService<?, ?> service : AnimationApi.getServiceGetterHelper().getAllServices()) {
+            result.add(new AbstractMap.SimpleEntry<>(service, service.getAnimationPlaying(player)));
+        }
+        return result;
     }
 
     public ApiBack removeAnimation(ResourceLocation layer) {

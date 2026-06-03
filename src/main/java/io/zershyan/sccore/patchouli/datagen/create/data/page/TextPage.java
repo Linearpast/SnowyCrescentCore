@@ -14,6 +14,11 @@ public class TextPage extends IPageType {
         this.text = text;
     }
 
+    public TextPage(@NotNull ResourceLocation type, @NotNull String text) {
+        super(type);
+        this.text = text;
+    }
+
     public TextPage title(String title) {
         this.title = title;
         return this;
