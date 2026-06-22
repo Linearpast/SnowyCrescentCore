@@ -1,11 +1,11 @@
 package io.zershyan.sccore.patchouli.datagen.create.data.format;
 
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,7 +34,7 @@ public class BlockStateFormat implements IFormat {
     }
 
     public static BlockStateFormat of(Block block) {
-        ResourceLocation key = ForgeRegistries.BLOCKS.getKey(block);
+        ResourceLocation key = BuiltInRegistries.BLOCK.getKeyOrNull(block);
         if(key == null) throw new RuntimeException("Block  " + block + " has no key");
         return of(key);
     }

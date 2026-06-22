@@ -9,7 +9,7 @@ public class QuestPage extends IPageType {
     private String text;
 
     public QuestPage() {
-        super(new ResourceLocation("patchouli", "quest"));
+        super(ResourceLocation.fromNamespaceAndPath("patchouli", "quest"));
     }
 
     public QuestPage trigger(ResourceLocation trigger) {

@@ -18,7 +18,7 @@ public class ImagePage extends IPageType {
     private Boolean border;
 
     public ImagePage() {
-        super(new ResourceLocation("patchouli", "image"));
+        super(ResourceLocation.fromNamespaceAndPath("patchouli", "image"));
     }
 
     public ImagePage addImage(ResourceLocation ... images) {

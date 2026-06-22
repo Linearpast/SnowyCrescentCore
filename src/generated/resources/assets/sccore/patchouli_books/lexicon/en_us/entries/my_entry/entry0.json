@@ -1,0 +1,72 @@
+{
+  "category": "sccore:category1",
+  "icon": "minecraft:diamond_sword",
+  "name": "My entry 0 name",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "This is entry0 of my entry."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "minecraft:crafting_table"
+    },
+    {
+      "type": "patchouli:smelting",
+      "recipe": "minecraft:stone"
+    },
+    {
+      "type": "sccore:my_template",
+      "entity": "minecraft:chicken",
+      "text1": "This is text1, this is a chicken."
+    },
+    {
+      "type": "patchouli:empty"
+    },
+    {
+      "type": "patchouli:entity",
+      "entity": "minecraft:horse"
+    },
+    {
+      "type": "patchouli:quest"
+    },
+    {
+      "type": "patchouli:relations",
+      "entries": [
+        "sccore:entry0"
+      ]
+    },
+    {
+      "type": "patchouli:multiblock",
+      "multiblock": {
+        "mapping": {
+          "0": "minecraft:stone",
+          "B": "minecraft:stone_stairs[facing=east]",
+          "D": "minecraft:diamond_block",
+          "Q": "minecraft:quartz_block",
+          "R": "minecraft:redstone_block",
+          "S": "minecraft:stone",
+          "W": "#minecraft:wool"
+        },
+        "pattern": [
+          [
+            " QRQ ",
+            " QBQ ",
+            " QWQ ",
+            " QBQ ",
+            " QRQ "
+          ],
+          [
+            "_____",
+            "DDDDD",
+            "SS0SS",
+            "DDDDD",
+            "_____"
+          ]
+        ],
+        "symmetrical": true
+      },
+      "name": "This is a custom multiblock"
+    }
+  ]
+}

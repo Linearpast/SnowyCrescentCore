@@ -24,7 +24,7 @@ public class ImageComponent extends ITemplateComponent {
             @NotNull Integer width,
             @NotNull Integer height
     ) {
-        super(new ResourceLocation("patchouli", "image"));
+        super(ResourceLocation.fromNamespaceAndPath("patchouli", "image"));
         this.image = image;
         this.width = width;
         this.height = height;

@@ -1,0 +1,20 @@
+{
+  "components": [
+    {
+      "type": "patchouli:text",
+      "text": "#text1"
+    }
+  ],
+  "include": [
+    {
+      "as": "template0",
+      "template": "sccore:util/template0",
+      "using": {
+        "entity": "#entity",
+        "text": "This is text in template0"
+      },
+      "x": 100,
+      "y": 100
+    }
+  ]
+}

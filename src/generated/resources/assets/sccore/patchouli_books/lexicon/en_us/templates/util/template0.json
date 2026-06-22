@@ -1,0 +1,12 @@
+{
+  "components": [
+    {
+      "type": "patchouli:text",
+      "text": "#text"
+    },
+    {
+      "type": "patchouli:entity",
+      "entity": "#entity"
+    }
+  ]
+}

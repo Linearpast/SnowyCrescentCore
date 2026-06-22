@@ -5,7 +5,7 @@ import net.minecraft.resources.ResourceLocation;
 
 public class SeparatorComponent extends ITemplateComponent {
     public SeparatorComponent() {
-        super(new ResourceLocation("patchouli", "separator"));
+        super(ResourceLocation.fromNamespaceAndPath("patchouli", "separator"));
     }
 
     @Override

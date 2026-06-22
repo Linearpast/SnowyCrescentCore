@@ -16,7 +16,7 @@ public class EntityPage extends IPageType {
     private String text;
 
     public EntityPage(@NotNull EntityFormat entity) {
-        super(new ResourceLocation("patchouli", "entity"));
+        super(ResourceLocation.fromNamespaceAndPath("patchouli", "entity"));
         this.entity = entity;
     }
 

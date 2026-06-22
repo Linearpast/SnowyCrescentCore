@@ -8,7 +8,6 @@ import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.common.data.ExistingFileHelper;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
@@ -21,30 +20,28 @@ import java.util.concurrent.CompletableFuture;
 public abstract class PatchouliBookProvider implements DataProvider {
 
     private final String modId;
-    private final ExistingFileHelper fileHelper;
     private final CompletableFuture<HolderLookup.Provider> registries;
     private final PackOutput packOutput;
     private final Map<String, IPatchouliBookData> bookBuilders = new HashMap<>();
 
     private static final String patchouliDirectory = "patchouli_books";
 
-    public PatchouliBookProvider(String modId, PackOutput output, ExistingFileHelper fileHelper, CompletableFuture<HolderLookup.Provider> registries) {
+    public PatchouliBookProvider(String modId, PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
         this.modId = modId;
-        this.fileHelper = fileHelper;
         this.packOutput = output;
         this.registries = registries;
     }
 
-    protected abstract void addBooks(HolderLookup.Provider provider, ExistingFileHelper fileHelper);
+    protected abstract void addBooks(HolderLookup.Provider provider, PackOutput output);
 
     @Override
     public @NotNull CompletableFuture<?> run(@NotNull CachedOutput pOutput) {
         return this.registries.thenCompose(provider -> {
             List<CompletableFuture<?>> list = new ArrayList<>();
-            this.addBooks(provider, this.fileHelper);
+            this.addBooks(provider, packOutput);
             this.bookBuilders.forEach((key, value) -> {
                 Path path = this.packOutput.createPathProvider(PackOutput.Target.DATA_PACK, patchouliDirectory)
-                        .json(new ResourceLocation(this.modId, key + "/book"));
+                        .json(ResourceLocation.fromNamespaceAndPath(this.modId, key + "/book"));
                 list.add(DataProvider.saveStable(pOutput, value.serialize(), path));
             });
             return CompletableFuture.allOf(list.toArray(new CompletableFuture<?>[0]));

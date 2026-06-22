@@ -5,6 +5,6 @@ import org.jetbrains.annotations.NotNull;
 
 public class CraftingRecipePage extends RecipePage{
     public CraftingRecipePage(@NotNull ResourceLocation recipe) {
-        super(new ResourceLocation("patchouli", "crafting"), recipe);
+        super(ResourceLocation.fromNamespaceAndPath("patchouli", "crafting"), recipe);
     }
 }

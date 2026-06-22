@@ -13,7 +13,7 @@ public class ItemComponent extends ITemplateComponent{
     private Boolean linkRecipe;
 
     public ItemComponent(@NotNull Variable<ItemFormat.Multi> item) {
-        super(new ResourceLocation("patchouli", "item"));
+        super(ResourceLocation.fromNamespaceAndPath("patchouli", "item"));
         this.item = item;
     }
 

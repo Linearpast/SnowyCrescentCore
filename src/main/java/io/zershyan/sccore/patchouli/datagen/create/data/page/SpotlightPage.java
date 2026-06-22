@@ -13,7 +13,7 @@ public class SpotlightPage extends IPageType {
     private Boolean linkRecipe;
 
     public SpotlightPage(ItemFormat.@NotNull Multi item) {
-        super(new ResourceLocation("patchouli", "spotlight"));
+        super(ResourceLocation.fromNamespaceAndPath("patchouli", "spotlight"));
         this.item = item;
     }
 

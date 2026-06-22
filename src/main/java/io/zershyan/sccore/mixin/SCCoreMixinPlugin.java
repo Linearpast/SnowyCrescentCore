@@ -1,9 +1,5 @@
 package io.zershyan.sccore.mixin;
 
-import io.zershyan.sccore.SnowyCrescentCore;
-import io.zershyan.sccore.animation.service.AnimationService;
-import net.minecraftforge.fml.loading.LoadingModList;
-import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
@@ -24,11 +20,6 @@ public class SCCoreMixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        if (mixinClassName.startsWith("io.zershyan." + SnowyCrescentCore.MODID + ".mixin.animation.")) {
-            return LoadingModList.get().getMods().stream().map(ModInfo::getModId).anyMatch(
-                    s -> s.equals(AnimationService.AnimModId)
-            );
-        }
         return true;
     }
 

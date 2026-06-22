@@ -14,7 +14,7 @@ public class HeaderComponent extends ITemplateComponent {
     private Float scale;
 
     public HeaderComponent(@NotNull Variable<StringFormat> text) {
-        super(new ResourceLocation("patchouli", "header"));
+        super(ResourceLocation.fromNamespaceAndPath("patchouli", "header"));
         this.text = text;
     }
 

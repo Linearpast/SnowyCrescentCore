@@ -1,5 +1,5 @@
 {
-  "sccore.resources": "Resources for SnowyCrescentCore",
+  "sccore.resources": "Resources for SCCore",
   "translation.sccore.command.animation.accept_apply_success": "%s 接受了 %s 的申请。",
   "translation.sccore.command.animation.accept_invite_success": "已接受邀请。",
   "translation.sccore.command.animation.accept_message_click": "单击此处同意。",

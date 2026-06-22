@@ -16,7 +16,7 @@ public class RelationsPage extends IPageType {
     private String text;
 
     public RelationsPage() {
-        super(new ResourceLocation("patchouli", "relations"));
+        super(ResourceLocation.fromNamespaceAndPath("patchouli", "relations"));
     }
 
     public RelationsPage addEntries(IPatchouliEntryData ... entries) {

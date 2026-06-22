@@ -7,7 +7,7 @@ public class EmptyPage extends IPageType {
     private Boolean drawFiller;
 
     public EmptyPage() {
-        super(new ResourceLocation("patchouli", "empty"));
+        super(ResourceLocation.fromNamespaceAndPath("patchouli", "empty"));
     }
 
     public EmptyPage drawFiller(Boolean drawFiller) {

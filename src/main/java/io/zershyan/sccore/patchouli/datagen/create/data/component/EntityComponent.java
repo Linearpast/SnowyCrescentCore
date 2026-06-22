@@ -14,7 +14,7 @@ public class EntityComponent extends ITemplateComponent {
     private Float defaultRotation;
 
     public EntityComponent(@NotNull Variable<EntityFormat> entity) {
-        super(new ResourceLocation("patchouli", "entity"));
+        super(ResourceLocation.fromNamespaceAndPath("patchouli", "entity"));
         this.entity = entity;
     }
 

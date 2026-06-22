@@ -9,7 +9,7 @@ public class CustomComponent extends ITemplateComponent {
     private final Class<?> aClass;
 
     public CustomComponent(@NotNull Class<?> aClass) {
-        super(new ResourceLocation("patchouli", "custom"));
+        super(ResourceLocation.fromNamespaceAndPath("patchouli", "custom"));
         this.aClass = aClass;
     }
 

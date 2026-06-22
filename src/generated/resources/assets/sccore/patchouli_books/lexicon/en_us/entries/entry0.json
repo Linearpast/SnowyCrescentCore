@@ -1,0 +1,17 @@
+{
+  "category": "sccore:category1",
+  "icon": "minecraft:oak_log",
+  "name": "Entry 0 name",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "This is text1 content.",
+      "title": "This is text1 title."
+    },
+    {
+      "type": "patchouli:link",
+      "link_text": "Click to open Bing.",
+      "url": "https://www.bing.com/"
+    }
+  ]
+}

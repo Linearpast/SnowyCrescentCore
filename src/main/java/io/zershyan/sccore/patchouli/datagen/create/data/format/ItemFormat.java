@@ -1,11 +1,10 @@
 package io.zershyan.sccore.patchouli.datagen.create.data.format;
 
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,7 +13,6 @@ import java.util.List;
 public class ItemFormat implements IFormat {
     private final String item;
     private int count;
-    private CompoundTag nbt;
     private boolean isTag = false;
 
     ItemFormat(String item) {
@@ -36,27 +34,21 @@ public class ItemFormat implements IFormat {
     }
 
     public static ItemFormat of(Item item) {
-        ResourceLocation key = ForgeRegistries.ITEMS.getKey(item);
+        ResourceLocation key = BuiltInRegistries.ITEM.getKeyOrNull(item);
         if(key == null) throw new RuntimeException("Item " + item + " has no key");
         return new ItemFormat(key.toString());
     }
 
     public static ItemFormat of(ItemStack stack) {
-        ResourceLocation key = ForgeRegistries.ITEMS.getKey(stack.getItem());
+        ResourceLocation key = BuiltInRegistries.ITEM.getKeyOrNull(stack.getItem());
         if(key == null) throw new RuntimeException("Item " + stack.getItem() + " has no key");
         ItemFormat itemFormat = of(key);
         itemFormat.count = stack.getCount();
-        itemFormat.nbt = stack.getTag();
         return itemFormat;
     }
 
     public ItemFormat count(int count) {
         this.count = count;
-        return this;
-    }
-
-    public ItemFormat nbt(CompoundTag nbt) {
-        this.nbt = nbt;
         return this;
     }
 
@@ -68,7 +60,6 @@ public class ItemFormat implements IFormat {
         } else {
             sb.append(item);
             if(count > 1) sb.append("#").append(count);
-            if(nbt != null) sb.append(nbt);
         }
         return sb.toString();
     }

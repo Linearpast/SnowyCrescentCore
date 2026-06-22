@@ -1,0 +1,25 @@
+{
+  "category": "sccore:category1",
+  "icon": "minecraft:diamond",
+  "name": "Entry 1 name",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "This is entry1."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "tag:minecraft:wool",
+      "link_recipe": true,
+      "text": "This is wool."
+    },
+    {
+      "type": "patchouli:image",
+      "border": true,
+      "images": [
+        "minecraft:textures/item/wheat.png"
+      ],
+      "text": "This is wheat icon."
+    }
+  ]
+}

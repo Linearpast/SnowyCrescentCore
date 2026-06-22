@@ -10,7 +10,7 @@ public class TextPage extends IPageType {
     private String title;
 
     public TextPage(@NotNull String text) {
-        super(new ResourceLocation("patchouli", "text"));
+        super(ResourceLocation.fromNamespaceAndPath("patchouli", "text"));
         this.text = text;
     }
 

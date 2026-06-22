@@ -12,7 +12,7 @@ public class LinkPage extends TextPage {
     private String text;
 
     public LinkPage(@NotNull String url, @NotNull String linkText) {
-        super(new ResourceLocation("patchouli", "link"), "");
+        super(ResourceLocation.fromNamespaceAndPath("patchouli", "link"), "");
         this.url = url;
         this.linkText = linkText;
     }

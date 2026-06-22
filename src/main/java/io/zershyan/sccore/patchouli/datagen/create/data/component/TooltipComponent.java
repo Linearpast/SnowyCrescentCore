@@ -19,7 +19,7 @@ public class TooltipComponent extends ITemplateComponent {
     private final Integer height;
 
     public TooltipComponent(@NotNull Integer width, @NotNull Integer height) {
-        super(new ResourceLocation("patchouli", "tooltip"));
+        super(ResourceLocation.fromNamespaceAndPath("patchouli", "tooltip"));
         this.width = width;
         this.height = height;
     }

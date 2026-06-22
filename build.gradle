@@ -1,102 +1,25 @@
-//file:noinspection GroovyAssignabilityCheck
-buildscript {
-    repositories {
-        maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
-    }
-}
-
 plugins {
-    id 'eclipse'
-    id 'idea'
+    id 'java-library'
     id 'maven-publish'
-    id 'net.minecraftforge.gradle' version '[6.0.16,6.2)'
-    id 'org.parchmentmc.librarian.forgegradle' version '1.+'
+    id 'net.neoforged.moddev' version '2.0.141'
+    id 'idea'
 }
 
-apply plugin: 'org.spongepowered.mixin'
+tasks.named('wrapper', Wrapper).configure {
+    distributionType = Wrapper.DistributionType.BIN
+}
 
 group = mod_group_id
 version = mod_version
 
-base {
-    archivesName = mod_id
+sourceSets.main.resources {
+    srcDir('src/generated/resources')
+    exclude("**/*.bbmodel") // BlockBench project files
+    exclude("src/generated/**/.cache") // datagen cache files
 }
-
-java {
-    withSourcesJar()
-    withJavadocJar()
-    toolchain.languageVersion = JavaLanguageVersion.of(17)
-}
-
-minecraft {
-    mappings channel: mapping_channel, version: mapping_version
-
-    accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
-
-    copyIdeResources = true
-
-    runs {
-        configureEach {
-            workingDirectory(file('run'))
-
-            property 'forge.logging.markers', 'REGISTRIES'
-
-            property 'forge.logging.console.level', 'debug'
-
-            mods {
-                "${mod_id}" {
-                    source sourceSets.main
-                }
-            }
-        }
-
-        var client = client {
-            property 'forge.enabledGameTestNamespaces', mod_id
-            property 'mixin.env.remapRefMap', 'true'
-            property 'mixin.env.refMapRemappingFile', "${project.projectDir}/build/createSrgToMcp/output.srg"
-        }
-
-        client_0 {
-            parent(client)
-            args("--username", "player_0")
-        }
-
-        client_1 {
-            parent(client)
-            args("--username", "player_1")
-        }
-
-        server {
-            property 'forge.enabledGameTestNamespaces', mod_id
-            property 'mixin.env.remapRefMap', 'true'
-            property 'mixin.env.refMapRemappingFile', "${project.projectDir}/build/createSrgToMcp/output.srg"
-            args '--nogui'
-        }
-
-        gameTestServer {
-            property 'forge.enabledGameTestNamespaces', mod_id
-        }
-
-        data {
-            workingDirectory(file('run-data'))
-            property('gradle.task', 'runData')
-            args '--mod', mod_id, '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
-        }
-    }
-}
-
-mixin {
-    add sourceSets.main, "${mod_id}.refmap.json"
-    config "${mod_id}.mixins.json"
-}
-
-sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 repositories {
+    mavenLocal()
     flatDir {
         dir 'libs'
     }
@@ -118,75 +41,126 @@ repositories {
     maven {
         url "https://maven.blamejared.com"
     }
+    maven {
+        url = "https://maven.enjarai.dev/mirrors"
+    }
 }
 
-jarJar.enable()
+base {
+    archivesName = mod_id
+}
+
+java {
+    withSourcesJar()
+    withJavadocJar()
+    toolchain.languageVersion = JavaLanguageVersion.of(21)
+}
+
+neoForge {
+    version = project.neo_version
+
+    parchment {
+        mappingsVersion = project.parchment_mappings_version
+        minecraftVersion = project.parchment_minecraft_version
+    }
+
+    accessTransformers = project.files('src/main/resources/META-INF/accesstransformer.cfg')
+
+    runs {
+        client1 {
+            client()
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+            gameDirectory = project.file('./run/client1')
+            programArguments.addAll("--username", "player1")
+        }
+
+        client2 {
+            client()
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+            gameDirectory = project.file('./run/client2')
+            programArguments.addAll("--username", "player2")
+        }
+
+        server {
+            server()
+            programArgument '--nogui'
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        }
+
+        gameTestServer {
+            type = "gameTestServer"
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        }
+
+        data {
+            data()
+            programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+        }
+
+        configureEach {
+            systemProperty 'forge.logging.markers', 'REGISTRIES'
+            logLevel = org.slf4j.event.Level.DEBUG
+        }
+    }
+
+    mods {
+        "${mod_id}" {
+            sourceSet(sourceSets.main)
+        }
+    }
+}
+
+configurations {
+    runtimeClasspath.extendsFrom localRuntime
+}
+
+jarJar.setEnabled(true)
 
 dependencies {
-    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
-    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
-    compileOnly 'org.spongepowered:mixin:0.8.5'
-    implementation(annotationProcessor("io.github.llamalad7:mixinextras-common:0.4.1"))
-    implementation(jarJar("io.github.llamalad7:mixinextras-forge:0.4.1") {
-        jarJar.ranged(it, "[0.4.1,)")
-    })
-
     //Patchouli
-    compileOnly fg.deobf("vazkii.patchouli:Patchouli:1.20.1-85-FORGE")
+    implementation "vazkii.patchouli:Patchouli:1.21.1-93-NEOFORGE"
 
     //JEI
-    implementation fg.deobf("curse.maven:jei-238222:6600311")
+    implementation "curse.maven:jei-238222:7420587"
 
     //player animator
-    implementation fg.deobf("dev.kosmx.player-anim:player-animation-lib-forge:1.0.2-rc1+1.20")
-    implementation fg.deobf("io.github.kosmx.bendy-lib:bendy-lib-forge:4.0.0")
+    implementation "dev.kosmx.player-anim:player-animation-lib-forge:2.0.1+1.21.1"
+    implementation "io.github.kosmx.bendy-lib:bendy-lib-forge:5.1"
 
     if(!project.gradle.startParameter.taskNames.any { "runServer" in it }) {
-        runtimeOnly fg.deobf("curse.maven:freecam-by-zergatul-618947:5402097")
-        runtimeOnly fg.deobf("curse.maven:jade-324717:6855440")
+        runtimeOnly "curse.maven:freecam-by-zergatul-618947:5591136"
+        runtimeOnly "curse.maven:jade-324717:7545219"
     }
+
+    // Mixin^2
+    compileOnly(annotationProcessor("com.github.bawnorton.mixinsquared:mixinsquared-common:0.3.7-beta.1"))
+    implementation(jarJar("com.github.bawnorton.mixinsquared:mixinsquared-neoforge:0.3.7-beta.1"))
 }
 
-tasks.named('processResources', ProcessResources).configure {
+var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {
     var replaceProperties = [
-            minecraft_version: minecraft_version,
+            minecraft_version      : minecraft_version,
             minecraft_version_range: minecraft_version_range,
-            forge_version: forge_version,
-            forge_version_range: forge_version_range,
-            loader_version_range: loader_version_range,
-            mod_id: mod_id,
-            mod_name: mod_name,
-            mod_license: mod_license,
-            mod_version: mod_version,
-            mod_authors: mod_authors,
-            mod_description: mod_description,
-            mod_credits: mod_credits,
-            mod_url: mod_url,
+            neo_version            : neo_version,
+            neo_version_range      : neo_version_range,
+            loader_version_range   : loader_version_range,
+            mod_id                 : mod_id,
+            mod_name               : mod_name,
+            mod_license            : mod_license,
+            mod_version            : mod_version,
+            mod_authors            : mod_authors,
+            mod_description        : mod_description,
+            mod_credits            : mod_credits,
+            mod_url                : mod_url,
     ]
-
     inputs.properties replaceProperties
-
-    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
-        expand replaceProperties + [project: project]
-    }
+    expand replaceProperties
+    from "src/main/templates"
+    into "build/generated/sources/modMetadata"
 }
 
-tasks.named('jar', Jar).configure {
-    manifest {
-        attributes(["Specification-Title"     : mod_id,
-                    "Specification-Vendor"    : mod_authors,
-                    "Specification-Version"   : "1",
-                    "Implementation-Title"    : project.name,
-                    "Implementation-Version"  : project.jar.archiveVersion,
-                    "Implementation-Vendor"   : mod_authors,
-                    "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-                    "MixinConfigs"            : "${mod_id}.mixins.json"
-        ])
-    }
-
-    archiveFileName = "${mod_id}-${mod_version}-origin.jar"
-    finalizedBy 'reobfJar'
-}
+sourceSets.main.resources.srcDir generateModMetadata
+neoForge.ideSyncTask generateModMetadata
 
 tasks.withType(Javadoc).configureEach {
     options.addStringOption('Xdoclint:none', '-quiet')
@@ -195,33 +169,10 @@ tasks.withType(Javadoc).configureEach {
     failOnError = false
 }
 
-tasks.register('deobfJar', Jar) {
-    from(sourceSets.main.output)
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    manifest {
-        attributes(["Specification-Title"     : mod_id,
-                    "Specification-Vendor"    : mod_authors,
-                    "Specification-Version"   : "1",
-                    "Implementation-Title"    : project.name,
-                    "Implementation-Version"  : project.jar.archiveVersion,
-                    "Implementation-Vendor"   : mod_authors,
-                    "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-                    "MixinConfigs"            : "${mod_id}.mixins.json"
-        ])
-    }
-    dependsOn classes
-}
-
 publishing {
     publications {
-        mavenJava(MavenPublication) {
-            artifact deobfJar
-            artifact javadocJar
-            artifact sourcesJar
-
-            groupId = project.group
-            artifactId = mod_id
-            version = project.version
+        register('mavenJava', MavenPublication) {
+            from components.java
             pom {
                 name = mod_id
                 description = mod_description
@@ -260,17 +211,13 @@ publishing {
     }
 }
 
-gradle.buildFinished {
-    def javadocJar = file("build/libs/${mod_id}-${mod_version}-javadoc.jar")
-    def sourcesJar = file("build/libs/${mod_id}-${mod_version}-sources.jar")
-    def allJarsJar = file("build/libs/${mod_id}-${mod_version}-all.jar")
-    if (javadocJar.exists()) ant.delete(file: javadocJar)
-    if (sourcesJar.exists()) ant.delete(file: sourcesJar)
-    if (allJarsJar.exists()) {
-        ant.move(file: allJarsJar, tofile: file("build/libs/${mod_id}-${mod_version}.jar"))
-    }
-}
-
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
+}
+
+idea {
+    module {
+        downloadSources = true
+        downloadJavadoc = true
+    }
 }

@@ -1,5 +1,5 @@
 {
-  "sccore.resources": "Resources for SnowyCrescentCore",
+  "sccore.resources": "Resources for SCCore",
   "translation.sccore.command.animation.accept_apply_success": "%s has accepted the application of %s.",
   "translation.sccore.command.animation.accept_invite_success": "Invitation accepted.",
   "translation.sccore.command.animation.accept_message_click": "Click here to accept.",

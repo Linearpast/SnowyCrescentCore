@@ -13,7 +13,7 @@ public class TextComponent extends ITemplateComponent{
     private Integer maxWidth;
     private Integer lineHeight;
     public TextComponent(@NotNull Variable<StringFormat> text) {
-        super(new ResourceLocation("patchouli", "text"));
+        super(ResourceLocation.fromNamespaceAndPath("patchouli", "text"));
         this.text = text;
     }
 

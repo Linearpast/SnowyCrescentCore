@@ -5,7 +5,7 @@ import net.minecraft.resources.ResourceLocation;
 
 public class FrameComponent extends ITemplateComponent {
     public FrameComponent() {
-        super(new ResourceLocation("patchouli", "frame"));
+        super(ResourceLocation.fromNamespaceAndPath("patchouli", "frame"));
     }
 
     @Override

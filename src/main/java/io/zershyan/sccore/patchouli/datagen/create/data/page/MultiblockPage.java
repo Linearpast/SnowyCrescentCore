@@ -14,7 +14,7 @@ public class MultiblockPage extends IPageType {
     private String text;
 
     public MultiblockPage(@NotNull String name, @NotNull MultiblockFormat multiblockFormat) {
-        super(new ResourceLocation("patchouli", "multiblock"));
+        super(ResourceLocation.fromNamespaceAndPath("patchouli", "multiblock"));
         this.name = name;
         this.multiblockFormat = multiblockFormat;
     }

@@ -1,10 +1,10 @@
 package io.zershyan.sccore.patchouli.datagen.create.data.format;
 
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraftforge.registries.ForgeRegistries;
 
 public class EntityFormat implements IFormat {
     private final String entity;
@@ -18,7 +18,7 @@ public class EntityFormat implements IFormat {
     }
 
     public static EntityFormat of(EntityType<?> entityType) {
-        ResourceLocation key = ForgeRegistries.ENTITY_TYPES.getKey(entityType);
+        ResourceLocation key = BuiltInRegistries.ENTITY_TYPE.getKeyOrNull(entityType);
         if(key == null) throw new RuntimeException("Entity  " + entityType + " has no key");
         return of(key);
     }

@@ -8,7 +8,6 @@ import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.common.data.ExistingFileHelper;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
@@ -25,7 +24,6 @@ import java.util.concurrent.CompletableFuture;
 public abstract class PatchouliContentProvider implements DataProvider {
 
     private final String modId;
-    private final ExistingFileHelper fileHelper;
     private final CompletableFuture<HolderLookup.Provider> registries;
     private final PackOutput packOutput;
 
@@ -35,36 +33,35 @@ public abstract class PatchouliContentProvider implements DataProvider {
 
     private static final String patchouliDirectory = "patchouli_books";
 
-    public PatchouliContentProvider(String modId, PackOutput output, ExistingFileHelper fileHelper, CompletableFuture<HolderLookup.Provider> registries) {
+    public PatchouliContentProvider(String modId, PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
         this.modId = modId;
-        this.fileHelper = fileHelper;
         this.packOutput = output;
         this.registries = registries;
     }
 
-    protected abstract void addContent(HolderLookup.Provider provider, ExistingFileHelper fileHelper);
+    protected abstract void addContent(HolderLookup.Provider provider, PackOutput output);
 
     @Override
     public @NotNull CompletableFuture<?> run(@NotNull CachedOutput pOutput) {
         return this.registries.thenCompose(provider -> {
             List<CompletableFuture<?>> list = new ArrayList<>();
-            this.addContent(provider, this.fileHelper);
+            this.addContent(provider, this.packOutput);
             this.categoryBuilders.forEach((key, value) -> {
                 String directory = key.getNamespace() + "/en_us/categories/" + key.getPath();
                 Path path = this.packOutput.createPathProvider(PackOutput.Target.RESOURCE_PACK, patchouliDirectory)
-                        .json(new ResourceLocation(this.modId, directory));
+                        .json(ResourceLocation.fromNamespaceAndPath(this.modId, directory));
                 list.add(DataProvider.saveStable(pOutput, value.serialize(), path));
             });
             this.templateBuilders.forEach((key, value) -> {
                 String directory = key.getNamespace() + "/en_us/templates/" + key.getPath();
                 Path path = this.packOutput.createPathProvider(PackOutput.Target.RESOURCE_PACK, patchouliDirectory)
-                        .json(new ResourceLocation(this.modId, directory));
+                        .json(ResourceLocation.fromNamespaceAndPath(this.modId, directory));
                 list.add(DataProvider.saveStable(pOutput, value.serialize(), path));
             });
             this.entryBuilders.forEach((key, value) -> {
                 String directory = key.getNamespace() + "/en_us/entries/" + key.getPath();
                 Path path = this.packOutput.createPathProvider(PackOutput.Target.RESOURCE_PACK, patchouliDirectory)
-                        .json(new ResourceLocation(this.modId, directory));
+                        .json(ResourceLocation.fromNamespaceAndPath(this.modId, directory));
                 list.add(DataProvider.saveStable(pOutput, value.serialize(), path));
             });
             return CompletableFuture.allOf(list.toArray(new CompletableFuture<?>[0]));
@@ -88,7 +85,7 @@ public abstract class PatchouliContentProvider implements DataProvider {
             ItemFormat icon
     ) {
         return this.categoryBuilders.computeIfAbsent(categoryDirectory, rl -> new PatchouliCategoryData(
-                name, description, icon, new ResourceLocation(this.modId, categoryDirectory.getPath())
+                name, description, icon, ResourceLocation.fromNamespaceAndPath(this.modId, categoryDirectory.getPath())
         ));
     }
 
@@ -101,7 +98,7 @@ public abstract class PatchouliContentProvider implements DataProvider {
      */
     public final IPatchouliTemplateData createTemplate(ResourceLocation templateDirectory) {
         return this.templateBuilders.computeIfAbsent(templateDirectory, rl ->
-                new PatchouliTemplateData(new ResourceLocation(this.modId, templateDirectory.getPath()))
+                new PatchouliTemplateData(ResourceLocation.fromNamespaceAndPath(this.modId, templateDirectory.getPath()))
         );
     }
 
@@ -119,7 +116,7 @@ public abstract class PatchouliContentProvider implements DataProvider {
             ItemFormat icon
     ) {
         return this.entryBuilders.computeIfAbsent(entryDirectory, rl -> new PatchouliEntryData(
-                name, category, icon, new ResourceLocation(this.modId, entryDirectory.getPath())
+                name, category, icon, ResourceLocation.fromNamespaceAndPath(this.modId, entryDirectory.getPath())
         ));
     }
 
@@ -130,11 +127,11 @@ public abstract class PatchouliContentProvider implements DataProvider {
             String description,
             ItemFormat icon
     ){
-        return createCategory(new ResourceLocation(book.toString(), directory), name, description, icon);
+        return createCategory(ResourceLocation.fromNamespaceAndPath(book.toString(), directory), name, description, icon);
     }
 
     public final IPatchouliTemplateData createTemplate(Item book, String directory) {
-        return createTemplate(new ResourceLocation(book.toString(), directory));
+        return createTemplate(ResourceLocation.fromNamespaceAndPath(book.toString(), directory));
     }
 
     public final IPatchouliEntryData createEntry(
@@ -144,7 +141,7 @@ public abstract class PatchouliContentProvider implements DataProvider {
             ResourceLocation category,
             ItemFormat icon
     ) {
-        return createEntry(new ResourceLocation(book.toString(), directory), name, category, icon);
+        return createEntry(ResourceLocation.fromNamespaceAndPath(book.toString(), directory), name, category, icon);
     }
 
     public final IPatchouliEntryData createEntry(
