@@ -24,20 +24,48 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * 客户端动画播放器助手类。
+ * <p>
+ * 提供在客户端播放和管理玩家动画的便捷方法，包括播放动画、移除动画以及更新动画状态。
+ */
 public class AnimationPlayerHelper {
     private final AbstractClientPlayer player;
+
+    /**
+     * 构造函数。
+     *
+     * @param player 目标客户端玩家
+     */
     private AnimationPlayerHelper(AbstractClientPlayer player) {
         this.player = player;
     }
 
+    /**
+     * 创建动画播放器助手实例。
+     *
+     * @param player 目标客户端玩家
+     * @return 动画播放器助手实例
+     */
     public static AnimationPlayerHelper of(@NotNull AbstractClientPlayer player) {
         return new AnimationPlayerHelper(player);
     }
 
+    /**
+     * 播放指定层的动画。
+     *
+     * @param layer       动画层的资源位置
+     * @param animationId 动画的资源位置 ID
+     */
     public void playAnimation(ResourceLocation layer, ResourceLocation animationId) {
         innerPlayAnimation(layer, animationId);
     }
 
+    /**
+     * 移除指定层的动画。
+     *
+     * @param layer 动画层的资源位置
+     */
     public void removeAnimation(ResourceLocation layer) {
         innerPlayAnimation(layer, null);
     }
@@ -82,8 +110,11 @@ public class AnimationPlayerHelper {
     }
 
     /**
-     * 判别新Animation和旧的差别，新增/变化则播放动画，移除则移除动画
-     * @param newAnimations 新动画数据
+     * 更新动画状态，对比新旧动画数据并执行相应操作。
+     * <p>
+     * 新增或变化的动画会被播放，移除的动画会被停止。
+     *
+     * @param newAnimations 新的动画数据
      */
     public void updateAnimation(PlayerAnimations newAnimations) {
         PlayerAnimations oldAnimations = SCCAnimationApi.animation(player).getData();
