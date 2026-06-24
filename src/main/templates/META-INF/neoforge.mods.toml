@@ -33,17 +33,3 @@ type="required"
 versionRange="${minecraft_version_range}"
 ordering="NONE"
 side="BOTH"
-
-[[dependencies."${mod_id}"]]
-modId = "playeranimator"
-mandatory = false
-versionRange = "[2.0.0,)"
-ordering = "AFTER"
-side = "BOTH"
-
-[[dependencies."${mod_id}"]]
-modId = "bendylib"
-mandatory = false
-versionRange = "[5.1,)"
-ordering = "AFTER"
-side = "BOTH"

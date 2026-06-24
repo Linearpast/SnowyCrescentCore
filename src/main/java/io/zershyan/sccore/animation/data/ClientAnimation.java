@@ -1,177 +1,61 @@
 package io.zershyan.sccore.animation.data;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.kosmx.playerAnim.core.util.Vec3f;
-import io.zershyan.sccore.animation.data.util.JSONSerializable;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.fml.LogicalSide;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.TreeMap;
+import java.util.function.Function;
 
-public class ClientAnimation extends Animation {
-    private final CameraChange firstPersonCameraChange = new CameraChange(true);
-    private final CameraChange cameraChange = new CameraChange(false);
+public record ClientAnimation(
+        ResourceLocation animationLocation,
+        Optional<String> name,
+        int priority,
+        Optional<RideData> rideData,
+        CameraChange firstPersonCameraChange,
+        CameraChange cameraChange
+) {
+    public static final Codec<ClientAnimation> CODEC = RecordCodecBuilder.create(i -> i.group(
+            ResourceLocation.CODEC.fieldOf("animationLocation").forGetter(ClientAnimation::animationLocation),
+            Codec.STRING.optionalFieldOf("name").forGetter(ClientAnimation::name),
+            Codec.INT.fieldOf("priority").forGetter(ClientAnimation::priority),
+            RideData.CODEC.optionalFieldOf("rideData").forGetter(ClientAnimation::rideData),
+            CameraChange.CODEC.fieldOf("firstPersonCameraChange").forGetter(ClientAnimation::firstPersonCameraChange),
+            CameraChange.CODEC.fieldOf("cameraChange").forGetter(ClientAnimation::cameraChange)
+    ).apply(i, ClientAnimation::new));
 
-    protected ClientAnimation(ResourceLocation key) {
-        super(key, LogicalSide.CLIENT);
+    public ClientAnimation(ResourceLocation animationLocation, @Nullable String name, int priority, @Nullable RideData data) {
+        this(animationLocation, Optional.ofNullable(name), priority, Optional.ofNullable(data), new CameraChange(true), new CameraChange(false));
+    }
+    public ClientAnimation(ServerAnimation animation) {
+        this(animation.animationLocation(), animation.getName(), animation.priority(), animation.getRideData());
     }
 
-    public CameraChange getFirstPersonCameraChange() {
-        return firstPersonCameraChange;
+    public record CameraChange(boolean relative, TreeMap<Integer, CameraData> movement) {
+        public CameraChange(boolean relative) {
+            this(relative, new TreeMap<>());
+        }
+        public static final Codec<CameraChange> CODEC = RecordCodecBuilder.create(i -> i.group(
+                Codec.BOOL.fieldOf("relative").forGetter(CameraChange::relative),
+                Codec.unboundedMap(Codec.STRING.xmap(Integer::parseInt, Object::toString), CameraData.CODEC)
+                        .xmap(TreeMap::new, Function.identity())
+                        .fieldOf("movement")
+                        .forGetter(CameraChange::movement)
+        ).apply(i, CameraChange::new));
     }
-
-    public CameraChange getCameraChange() {
-        return cameraChange;
-    }
-
-    @Override
-    public JsonObject serialize() {
-        JsonObject object = super.serialize();
-        JsonObject fpObj = firstPersonCameraChange.serialize();
-        if(!fpObj.isEmpty()) {
-            object.add("firstPersonCameraChange", fpObj);
-        }
-        JsonObject obj = cameraChange.serialize();
-        if(!obj.isEmpty()) {
-            object.add("cameraChange", obj);
-        }
-        return object;
-    }
-
-    @Override
-    public void deserialize(JsonObject json) {
-        super.deserialize(json);
-        if(json.has("firstPersonCameraChange")) {
-            JsonElement element = json.get("firstPersonCameraChange");
-            if(element.isJsonObject()) {
-                CameraChange change = new CameraChange(true);
-                change.deserialize(element.getAsJsonObject());
-                firstPersonCameraChange.relative = change.relative;
-                firstPersonCameraChange.movement.clear();
-                firstPersonCameraChange.movement.putAll(change.movement);
-            }
-        }
-        if(json.has("cameraChange")) {
-            JsonElement element = json.get("cameraChange");
-            if(element.isJsonObject()) {
-                CameraChange change = new CameraChange(true);
-                change.deserialize(element.getAsJsonObject());
-                cameraChange.relative = change.relative;
-                cameraChange.movement.clear();
-                cameraChange.movement.putAll(change.movement);
-            }
-        }
-    }
-
-    public static class CameraChange implements JSONSerializable<JsonObject> {
-        private boolean relative;
-        private final TreeMap<Integer, CameraData> movement = new TreeMap<>();
-
-        private CameraChange(boolean relative) {
-            this.relative = relative;
-        }
-
-        public boolean isRelative() {
-            return relative;
-        }
-
-        public void setRelative(boolean relative) {
-            this.relative = relative;
-        }
-
-        public TreeMap<Integer, CameraData> getMovement() {
-            return movement;
-        }
-
-        @Override
-        public JsonObject serialize() {
-            JsonObject object = new JsonObject();
-            if(!movement.isEmpty()) {
-                object.addProperty("relative", relative);
-                JsonArray movementArray = new JsonArray();
-                for (CameraData data : movement.values()) {
-                    movementArray.add(data.serialize());
-                }
-                object.add("movement", movementArray);
-            }
-            return object;
-        }
-
-        @Override
-        public void deserialize(JsonObject json) {
-            if(json.has("relative")) {
-                relative = json.get("relative").getAsBoolean();
-            }
-            if(json.has("movement")) {
-                JsonElement element = json.get("movement");
-                if(element.isJsonArray()) {
-                    movement.clear();
-                    JsonArray array = element.getAsJsonArray();
-                    for (JsonElement jsonElement : array) {
-                        if(jsonElement.isJsonObject()) {
-                            JsonObject dataObj = jsonElement.getAsJsonObject();
-                            CameraData cameraData = CameraData.deserializeStatic(dataObj);
-                            movement.put(cameraData.tick(), cameraData);
-                        }
-                    }
-                }
-            }
-        }
-    }
-    public record CameraData(int tick, Vec3 offset, Vec3f camEulerAngles) implements JSONSerializable<JsonObject> {
-
-        @Override
-        public JsonObject serialize() {
-            JsonObject object = new JsonObject();
-            object.addProperty("tick", tick);
-            if(!offset.equals(Vec3.ZERO)) {
-                JsonObject offsetObject = new JsonObject();
-                offsetObject.addProperty("x", offset.x());
-                offsetObject.addProperty("y", offset.y());
-                offsetObject.addProperty("z", offset.z());
-                object.add("offset", offsetObject);
-            }
-            if(!camEulerAngles.equals(Vec3f.ZERO)) {
-                JsonObject camEulerObject = new JsonObject();
-                camEulerObject.addProperty("x", camEulerAngles.getX());
-                camEulerObject.addProperty("y", camEulerAngles.getY());
-                camEulerObject.addProperty("z", camEulerAngles.getZ());
-                object.add("camEulerAngles", camEulerObject);
-            }
-            return object;
-        }
-
-        @Override
-        public void deserialize(JsonObject json) { }
-
-        public static CameraData deserializeStatic(JsonObject json) {
-            int tick = json.has("tick") ? json.get("tick").getAsInt() : -1;
-            Vec3 offset = Vec3.ZERO;
-            Vec3f camEulerAngles = Vec3f.ZERO;
-            if(json.has("offset")) {
-                JsonElement element = json.get("offset");
-                if(element.isJsonObject()) {
-                    JsonObject offsetObj = element.getAsJsonObject();
-                    double x = offsetObj.has("x") ? offsetObj.get("x").getAsDouble() : 0.0;
-                    double y = offsetObj.has("y") ? offsetObj.get("y").getAsDouble() : 0.0;
-                    double z = offsetObj.has("z") ? offsetObj.get("z").getAsDouble() : 0.0;
-                    offset = new Vec3(x, y, z);
-                }
-            }
-            if(json.has("camEulerAngles")) {
-                JsonElement element = json.get("camEulerAngles");
-                if(element.isJsonObject()) {
-                    JsonObject cameraEulerObj = element.getAsJsonObject();
-                    float x = cameraEulerObj.has("x") ? cameraEulerObj.get("x").getAsFloat() : 0.0f;
-                    float y = cameraEulerObj.has("y") ? cameraEulerObj.get("y").getAsFloat() : 0.0f;
-                    float z = cameraEulerObj.has("z") ? cameraEulerObj.get("z").getAsFloat() : 0.0f;
-                    camEulerAngles = new Vec3f(x, y, z);
-                }
-            }
-            return new CameraData(tick, offset, camEulerAngles);
-        }
+    public record CameraData(int tick, Vec3 offset, Vec3f camEulerAngles) {
+        public static final Codec<CameraData> CODEC = RecordCodecBuilder.create(i -> i.group(
+                Codec.INT.fieldOf("tick").forGetter(CameraData::tick),
+                Vec3.CODEC.fieldOf("offset").forGetter(CameraData::offset),
+                Codec.FLOAT.listOf(3, 3).xmap(
+                        list -> new Vec3f(list.getFirst(), list.get(1), list.get(2)),
+                        vec -> List.of(vec.getX(), vec.getY(), vec.getZ())
+                ).fieldOf("camEulerAngles").forGetter(CameraData::camEulerAngles)
+        ).apply(i, CameraData::new));
     }
 }

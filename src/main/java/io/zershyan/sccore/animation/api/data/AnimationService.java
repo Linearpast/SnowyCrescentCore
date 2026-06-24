@@ -1,7 +1,7 @@
-package io.zershyan.sccore.animation.api.application;
+package io.zershyan.sccore.animation.api.data;
 
 import io.zershyan.sccore.animation.registry.AnimationAttachments;
-import io.zershyan.sccore.animation.registry.attachment.AnimationData;
+import io.zershyan.sccore.animation.registry.attachment.PlayerAnimations;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.attachment.AttachmentType;
 
@@ -15,16 +15,16 @@ public class AnimationService implements IAnimationService {
     }
 
     @Override
-    public AnimationData getData() {
-        return player.getData(type());
+    public PlayerAnimations getData() {
+        return PlayerAnimations.getData(player);
     }
 
     @Override
-    public void setData(AnimationData data) {
+    public void setData(PlayerAnimations data) {
         player.setData(type(), data);
     }
 
-    private static Supplier<AttachmentType<AnimationData>> type() {
-        return AnimationAttachments.ANIMATION_DATA;
+    private static Supplier<AttachmentType<PlayerAnimations>> type() {
+        return AnimationAttachments.PLAYER_ANIMATIONS;
     }
 }

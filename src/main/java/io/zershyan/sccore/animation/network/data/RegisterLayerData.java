@@ -1,0 +1,27 @@
+package io.zershyan.sccore.animation.network.data;
+
+import io.netty.buffer.ByteBuf;
+import io.zershyan.sccore.SCCore;
+import io.zershyan.sccore.animation.core.ServerAnimationRegistry;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.HashMap;
+
+public record RegisterLayerData(HashMap<ResourceLocation, Integer> layers) implements CustomPacketPayload {
+    public static final CustomPacketPayload.Type<@NotNull RegisterLayerData> TYPE =
+            new CustomPacketPayload.Type<>(SCCore.id("animator_layers"));
+
+    public static final StreamCodec<ByteBuf, RegisterLayerData> STREAM_CODEC = StreamCodec.composite(
+            ByteBufCodecs.fromCodec(ServerAnimationRegistry.LAYER_CODEC),
+            RegisterLayerData::layers, RegisterLayerData::new
+    );
+
+    @Override
+    public @NotNull Type<? extends CustomPacketPayload> type() {
+        return TYPE;
+    }
+}

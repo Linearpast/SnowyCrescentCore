@@ -115,13 +115,8 @@ public enum SCCTranslatableLang {
     )),
     ANIMATION_TO_JSON(new SCCoreLang.LangEntity<>(
             SCCoreLang.translationString + SCCoreLang.command + SCCoreLang.animation + ".animation_to_json",
-            "动画%s已经存储到%s路径：",
-            "The animation %s has been stored in the path on %s:"
-    )),
-    ANIMATION_JSON_PATH(new SCCoreLang.LangEntity<>(
-            SCCoreLang.translationString + SCCoreLang.command + SCCoreLang.animation + ".animation_json_path",
-            "%s",
-            "%s"
+            "JSON示例已生成到了路径：游戏根目录/%s",
+            "The JSON example has been generated into the path: Game_Root_Directory/%s"
     )),
     LIST_ANIMATION_RESOURCE(new SCCoreLang.LangEntity<>(
             SCCoreLang.translationString + SCCoreLang.command + SCCoreLang.animation + ".list_animation_resource",

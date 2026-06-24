@@ -6,11 +6,11 @@
 	"refmap": "sccore.refmap.json",
 	"plugin": "io.zershyan.sccore.mixin.SCCoreMixinPlugin",
 	"mixins": [
-
+		"sccore.common.MixinMinecraftServer"
 	],
 	"client": [
 		"playeranimator.client.MixinFactoryHolder",
-		"playeranimator.client.MixinPlayer"
+		"sccore.client.MixinMinecraft"
 	],
 	"injectors": {
 		"defaultRequire": 1

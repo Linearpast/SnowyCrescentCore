@@ -2,11 +2,12 @@ package io.zershyan.sccore;
 
 
 import com.mojang.logging.LogUtils;
-import io.zershyan.sccore.animation.SCCoreAnimation;
 import io.zershyan.sccore.common.configs.StartupConfig;
 import io.zershyan.sccore.common.registry.SCCCommands;
 import io.zershyan.sccore.common.registry.SCCConfigs;
-import io.zershyan.sccore.example.patchouli.SCCPatchouli;
+import io.zershyan.sccore.compat.SCCoreCompat;
+import io.zershyan.sccore.example.animation.ExampleAnimations;
+import io.zershyan.sccore.example.patchouli.ExamplePatchouli;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
@@ -20,7 +21,7 @@ public class SCCore {
     public static final Logger log = LogUtils.getLogger();
     public static final String MODID = "sccore";
 
-    public static ResourceLocation asResource(String path) {
+    public static ResourceLocation id(String path) {
         return ResourceLocation.fromNamespaceAndPath(MODID, path);
     }
 
@@ -28,13 +29,14 @@ public class SCCore {
     public static class Common {
         public Common(IEventBus modEventBus, ModContainer modContainer) {
             IEventBus neoEventBus = NeoForge.EVENT_BUS;
-            SCCCommands.registerCommands(neoEventBus, modEventBus);
-            SCCConfigs.register(modContainer);
 
-            SCCoreAnimation.register(modEventBus);
+            SCCConfigs.register(modContainer);
+            SCCoreCompat.register(neoEventBus, modEventBus);
+            SCCCommands.registerCommands(neoEventBus, modEventBus);
 
             if(!FMLEnvironment.production && StartupConfig.enableExample.get()) {
-                SCCPatchouli.register(neoEventBus, modEventBus);
+                ExampleAnimations.register(neoEventBus);
+                ExamplePatchouli.register(neoEventBus, modEventBus);
             }
         }
     }
@@ -42,7 +44,13 @@ public class SCCore {
     @Mod(value = SCCore.MODID, dist = Dist.CLIENT)
     public static class Client {
         public Client(IEventBus modEventBus, ModContainer modContainer) {
+            IEventBus neoEventBus = NeoForge.EVENT_BUS;
+
             SCCConfigs.registerClient(modContainer);
+
+            if(!FMLEnvironment.production && StartupConfig.enableExample.get()) {
+                ExampleAnimations.registerClient(neoEventBus);
+            }
         }
     }
 }

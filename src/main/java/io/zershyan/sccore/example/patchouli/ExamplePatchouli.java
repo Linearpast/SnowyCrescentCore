@@ -4,7 +4,7 @@ import io.zershyan.sccore.SCCore;
 import io.zershyan.sccore.example.patchouli.datagen.SCCPatchouliDataGen;
 import net.neoforged.bus.api.IEventBus;
 
-public class SCCPatchouli {
+public class ExamplePatchouli {
     /**
      * @see SCCore.Common#Common
      * @param forgeBus

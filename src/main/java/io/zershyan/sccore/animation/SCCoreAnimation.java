@@ -1,10 +1,44 @@
 package io.zershyan.sccore.animation;
 
+import io.zershyan.sccore.animation.core.ClientAnimationRegistry;
+import io.zershyan.sccore.animation.core.ServerAnimationRegistry;
+import io.zershyan.sccore.animation.network.data.RegisterAnimationData;
+import io.zershyan.sccore.animation.network.data.RegisterLayerData;
+import io.zershyan.sccore.animation.network.data.UpdateAnimationData;
+import io.zershyan.sccore.animation.network.handler.ClientPayloadHandler;
+import io.zershyan.sccore.animation.network.handler.ServerPayloadHandler;
 import io.zershyan.sccore.animation.registry.AnimationAttachments;
+import io.zershyan.sccore.animation.registry.AnimationCommands;
+import io.zershyan.sccore.api.ICompatUtils;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
-public class SCCoreAnimation {
-    public static void register(IEventBus modEventBus) {
-        AnimationAttachments.register(modEventBus);
+public class SCCoreAnimation extends ICompatUtils {
+    public static final String MODID = "playeranimator";
+    public SCCoreAnimation() {
+        super(MODID);
+    }
+
+    @Override
+    protected void addClientListener(IEventBus forgeBus, IEventBus modBus) {
+        forgeBus.register(ClientAnimationRegistry.class);
+        forgeBus.addListener(AnimationCommands::clientCommandRegister);
+    }
+
+    @Override
+    protected void addCommonListener(IEventBus forgeBus, IEventBus modBus) {
+        forgeBus.register(ServerAnimationRegistry.class);
+        forgeBus.addListener(AnimationCommands::commonCommandRegister);
+        AnimationAttachments.register(modBus);
+    }
+
+    @Override
+    public void registerNetwork(PayloadRegistrar registrar) {
+        //server
+        registrar.playToServer(UpdateAnimationData.TYPE, UpdateAnimationData.STREAM_CODEC, ServerPayloadHandler::updateAnimMap);
+
+        //client
+        registrar.playToClient(RegisterLayerData.TYPE, RegisterLayerData.STREAM_CODEC, ClientPayloadHandler::registerLayers);
+        registrar.playToClient(RegisterAnimationData.TYPE, RegisterAnimationData.STREAM_CODEC, ClientPayloadHandler::registerAnimations);
     }
 }
