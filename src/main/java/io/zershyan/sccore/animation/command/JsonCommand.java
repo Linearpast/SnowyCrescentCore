@@ -60,7 +60,7 @@ public class JsonCommand {
             movement1.put(2, new ClientAnimation.CameraData(2, Vec3.ZERO, Vec3f.ZERO));
             ClientAnimation clientAnimation = new ClientAnimation(
                     SCCore.id("animation_key"), Optional.of("测试动画"), 0,
-                    Optional.of(new RideData(List.of(SCCore.id("sub_animation")), new Vec3(0, 0, 0), 100, 90, 0)),
+                    Optional.of(new RideData(List.of(SCCore.id("sub_animation")), new Vec3(0, 0, 0), 100, 90, 0)), true,
                     new ClientAnimation.CameraChange(true, movement),
                     new ClientAnimation.CameraChange(false, movement1)
             );
@@ -71,7 +71,7 @@ public class JsonCommand {
             if(!Files.exists(serverAnimExample)) Files.createFile(serverAnimExample);
             ServerAnimation serverAnimation = new ServerAnimation(
                     SCCore.id("animation_key"), Optional.of("测试动画"), 0,
-                    Optional.of(new RideData(List.of(SCCore.id("sub_animation")), new Vec3(0, 0, 0), 100, 90, 0)),
+                    Optional.of(new RideData(List.of(SCCore.id("sub_animation")), new Vec3(0, 0, 0), 100, 90, 0)), true,
                     1.0f, new TreeMap<>(Map.of(1, new ServerAnimation.AABBData(1, new AABB(Vec3.ZERO, Vec3.ZERO.add(2.0, 2.0, 2.0)))))
             );
             JsonElement exampleServerAnimationJson = ServerAnimation.CODEC.encodeStart(JsonOps.INSTANCE, serverAnimation).getOrThrow();

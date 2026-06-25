@@ -10,6 +10,7 @@
 	],
 	"client": [
 		"playeranimator.client.MixinFactoryHolder",
+		"playeranimator.client.MixinKeyframeAnimationPlayer",
 		"sccore.client.MixinMinecraft"
 	],
 	"injectors": {

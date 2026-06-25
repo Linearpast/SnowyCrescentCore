@@ -10,9 +10,12 @@ import dev.kosmx.playerAnim.minecraftApi.PlayerAnimationAccess;
 import io.zershyan.sccore.SCCore;
 import io.zershyan.sccore.animation.api.SCCAnimationApi;
 import io.zershyan.sccore.animation.core.ClientAnimationRegistry;
+import io.zershyan.sccore.animation.data.ClientAnimation;
+import io.zershyan.sccore.animation.imixin.IMixinKeyframeAnimationPlayer;
 import io.zershyan.sccore.animation.registry.attachment.PlayerAnimations;
 import io.zershyan.sccore.common.datagen.init.SCCTranslatableLang;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.LocalPlayer;
@@ -61,6 +64,28 @@ public class AnimationPlayerHelper {
         innerPlayAnimation(layer, animationId);
     }
 
+    @SuppressWarnings("unchecked")
+    public void syncAnimation(AbstractClientPlayer target) {
+        PlayerAnimations playerData = PlayerAnimations.getData(player);
+        PlayerAnimations targetData = PlayerAnimations.getData(target);
+
+        ResourceLocation playerLayer = playerData.rideAnim().layer().orElse(null);
+        ResourceLocation targetLayer = targetData.rideAnim().layer().orElse(null);
+        try {
+            if(playerLayer == null || targetLayer == null) return;
+            ModifierLayer<IAnimation> modifierLayer = (ModifierLayer<IAnimation>) PlayerAnimationAccess
+                    .getPlayerAssociatedData(player).get(playerLayer);
+            ModifierLayer<IAnimation> targetModifierLayer = (ModifierLayer<IAnimation>) PlayerAnimationAccess
+                    .getPlayerAssociatedData(target).get(targetLayer);
+            if(modifierLayer == null || targetModifierLayer == null) return;
+            IMixinKeyframeAnimationPlayer animation = IMixinKeyframeAnimationPlayer.of(modifierLayer.getAnimation());
+            KeyframeAnimationPlayer targetAnimation = (KeyframeAnimationPlayer) targetModifierLayer.getAnimation();
+            if(animation == null || targetAnimation == null) return;
+            int currentTick = targetAnimation.getCurrentTick();
+            animation.sccore$setCurrentTick(currentTick);
+        } catch (Exception ignored) {}
+    }
+
     /**
      * 移除指定层的动画。
      *
@@ -73,7 +98,8 @@ public class AnimationPlayerHelper {
     @SuppressWarnings("unchecked")
     private void innerPlayAnimation(ResourceLocation layer, @Nullable ResourceLocation animationId) {
         try {
-            LocalPlayer localPlayer = Minecraft.getInstance().player;
+            Minecraft instance = Minecraft.getInstance();
+            LocalPlayer localPlayer = instance.player;
             ModifierLayer<IAnimation> modifierLayer = (ModifierLayer<IAnimation>) PlayerAnimationAccess
                     .getPlayerAssociatedData(player).get(layer);
             if(modifierLayer == null) return;
@@ -82,7 +108,10 @@ public class AnimationPlayerHelper {
                         3, Ease.INOUTSINE), null);
                 return;
             }
-            KeyframeAnimation keyframeAnimation = ClientAnimationRegistry.getKeyframeAnimation(animationId);
+            ClientAnimation animation = ClientAnimationRegistry.getAnimation(animationId);
+            if(animation == null) return;
+            if(animation.defaultThirdPerson()) instance.options.setCameraType(CameraType.THIRD_PERSON_BACK);
+            KeyframeAnimation keyframeAnimation = ClientAnimationRegistry.getKeyframeAnimation(animation);
             if(keyframeAnimation == null) {
                 if(localPlayer == null) return;
                 localPlayer.sendSystemMessage(Component.translatable(

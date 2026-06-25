@@ -2,11 +2,13 @@ package io.zershyan.sccore.animation.api;
 
 import io.zershyan.sccore.animation.api.client.AnimationPlayerHelper;
 import io.zershyan.sccore.animation.api.data.AnimationHelper;
+import io.zershyan.sccore.animation.api.server.AnimationRideHelper;
 import io.zershyan.sccore.animation.core.ClientAnimationRegistry;
 import io.zershyan.sccore.animation.core.ServerAnimationRegistry;
 import io.zershyan.sccore.compat.SCCoreCompat;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
@@ -48,6 +50,10 @@ public class SCCAnimationApi {
     @OnlyIn(Dist.CLIENT)
     public static AnimationPlayerHelper animPlayer(AbstractClientPlayer player) {
         return AnimationPlayerHelper.of(player);
+    }
+
+    public static AnimationRideHelper ridePlayer(ServerPlayer player) {
+        return AnimationRideHelper.of(player);
     }
 
     /**

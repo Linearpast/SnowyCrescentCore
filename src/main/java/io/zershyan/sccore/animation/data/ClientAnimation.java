@@ -12,28 +12,47 @@ import java.util.Optional;
 import java.util.TreeMap;
 import java.util.function.Function;
 
-public record ClientAnimation(
-        ResourceLocation animationLocation,
-        Optional<String> name,
-        int priority,
-        Optional<RideData> rideData,
-        CameraChange firstPersonCameraChange,
-        CameraChange cameraChange
-) {
+public class ClientAnimation extends Animation {
+    private final CameraChange firstPersonCameraChange;
+    private final CameraChange cameraChange;
     public static final Codec<ClientAnimation> CODEC = RecordCodecBuilder.create(i -> i.group(
             ResourceLocation.CODEC.fieldOf("animationLocation").forGetter(ClientAnimation::animationLocation),
             Codec.STRING.optionalFieldOf("name").forGetter(ClientAnimation::name),
             Codec.INT.fieldOf("priority").forGetter(ClientAnimation::priority),
             RideData.CODEC.optionalFieldOf("rideData").forGetter(ClientAnimation::rideData),
+            Codec.BOOL.fieldOf("defaultThirdPerson").forGetter(ClientAnimation::defaultThirdPerson),
             CameraChange.CODEC.fieldOf("firstPersonCameraChange").forGetter(ClientAnimation::firstPersonCameraChange),
             CameraChange.CODEC.fieldOf("cameraChange").forGetter(ClientAnimation::cameraChange)
     ).apply(i, ClientAnimation::new));
-
-    public ClientAnimation(ResourceLocation animationLocation, @Nullable String name, int priority, @Nullable RideData data) {
-        this(animationLocation, Optional.ofNullable(name), priority, Optional.ofNullable(data), new CameraChange(true), new CameraChange(false));
+    public static final Codec<ClientAnimation> SUB_CODEC = RecordCodecBuilder.create(i -> i.group(
+            ResourceLocation.CODEC.fieldOf("animationLocation").forGetter(ClientAnimation::animationLocation),
+            Codec.STRING.optionalFieldOf("name").forGetter(ClientAnimation::name),
+            Codec.INT.fieldOf("priority").forGetter(ClientAnimation::priority),
+            RideData.CODEC.optionalFieldOf("rideData").forGetter(ClientAnimation::rideData),
+            Codec.BOOL.fieldOf("defaultThirdPerson").forGetter(ClientAnimation::defaultThirdPerson)
+    ).apply(i, ClientAnimation::new));
+    public ClientAnimation(ResourceLocation animationLocation, Optional<String> name, int priority, Optional<RideData> rideData, boolean defaultThirdPerson, CameraChange firstPersonCameraChange, CameraChange cameraChange) {
+        super(animationLocation, name, priority, rideData, defaultThirdPerson);
+        this.firstPersonCameraChange = firstPersonCameraChange;
+        this.cameraChange = cameraChange;
+    }
+    public ClientAnimation(ResourceLocation animationLocation, Optional<String> name, int priority, Optional<RideData> rideData, boolean defaultThirdPerson) {
+        this(animationLocation, name, priority, rideData, defaultThirdPerson, new CameraChange(true), new CameraChange(false));
+    }
+    public ClientAnimation(ResourceLocation animationLocation, @Nullable String name, int priority, @Nullable RideData data, boolean defaultThirdPerson) {
+        this(animationLocation, Optional.ofNullable(name), priority, Optional.ofNullable(data), defaultThirdPerson, new CameraChange(true), new CameraChange(false));
     }
     public ClientAnimation(ServerAnimation animation) {
-        this(animation.animationLocation(), animation.getName(), animation.priority(), animation.getRideData());
+        this(animation.animationLocation(), animation.getName(), animation.priority(), animation.getRideData(), animation.defaultThirdPerson());
+    }
+
+
+
+    public CameraChange firstPersonCameraChange() {
+        return firstPersonCameraChange;
+    }
+    public CameraChange cameraChange() {
+        return cameraChange;
     }
 
     public record CameraChange(boolean relative, TreeMap<Integer, CameraData> movement) {

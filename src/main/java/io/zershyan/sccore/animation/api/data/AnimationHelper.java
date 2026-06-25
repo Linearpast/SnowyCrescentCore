@@ -113,6 +113,37 @@ public class AnimationHelper {
     }
 
     /**
+     * 服务端侧骑乘实体时该方法会被调用
+     * <br>
+     * 在服务端侧调用只会令播放动画
+     * <br>
+     * 在客户端侧调用会发包到服务端侧骑乘实体
+     * @param rideAnim 骑乘动画数据
+     */
+    public void playRideAnimation(PlayerAnimations.RideAnim rideAnim) {
+        try {
+            ResourceLocation layer = rideAnim.layer().orElseThrow();
+            if(!SCCAnimationApi.isLayerExist(layer)) throw new RuntimeException("Unknown layer.");
+            operaData(opera -> opera.setRideAnim(layer, rideAnim.animation().orElseThrow()).endOpera());
+        } catch (Exception e) {
+            SCCore.log.warn("Play ride animation error, layer : {}, animation : {}",
+                    rideAnim.layer().orElse(null), rideAnim.animation().orElse(null)
+            );
+        }
+    }
+
+    /**
+     * 服务端侧停止骑乘实体时该方法会被调用
+     * <br>
+     * 服务端侧调用停止动画
+     * <br>
+     * 在客户端侧调用会发包到服务端侧停止骑乘实体
+     */
+    public void removeRideAnimation() {
+        operaData(opera -> opera.clearRideAnim().endOpera());
+    }
+
+    /**
      * 记录未知动画层的警告日志。
      *
      * @param layer 动画层的资源位置

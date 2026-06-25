@@ -15,7 +15,7 @@ public class ClientAnimatorRegisterHandler {
     @SubscribeEvent
     public static void registerAnimationClient(AnimationRegisterEvent.Client event) {
         event.registerAnimation(SCCore.id("test_anim_client"), new ClientAnimation(
-                SCCore.id("waltz_gentleman"), "华尔兹（男）", 0, null
+                SCCore.id("waltz_gentleman"), "华尔兹（男）", 0, null, true
         ));
     }
 }

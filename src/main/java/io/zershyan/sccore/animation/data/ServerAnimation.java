@@ -12,19 +12,15 @@ import java.util.Optional;
 import java.util.TreeMap;
 import java.util.function.Function;
 
-public record ServerAnimation(
-        ResourceLocation animationLocation,
-        Optional<String> name,
-        int priority,
-        Optional<RideData> rideData,
-        float jumpModifier,
-        TreeMap<Integer, AABBData> aabbMovement
-) {
+public class ServerAnimation extends Animation {
+    private final float jumpModifier;
+    private final TreeMap<Integer, AABBData> aabbMovement;
     public static final Codec<ServerAnimation> CODEC = RecordCodecBuilder.create(i -> i.group(
             ResourceLocation.CODEC.fieldOf("animationLocation").forGetter(ServerAnimation::animationLocation),
             Codec.STRING.optionalFieldOf("name").forGetter(ServerAnimation::name),
             Codec.INT.fieldOf("priority").forGetter(ServerAnimation::priority),
             RideData.CODEC.optionalFieldOf("rideData").forGetter(ServerAnimation::rideData),
+            Codec.BOOL.fieldOf("defaultThirdPerson").forGetter(ServerAnimation::defaultThirdPerson),
             Codec.FLOAT.fieldOf("jumpModifier").forGetter(ServerAnimation::jumpModifier),
             Codec.unboundedMap(Codec.STRING.xmap(Integer::parseInt, Object::toString), AABBData.CODEC).xmap(TreeMap::new, Function.identity())
                     .fieldOf("aabbMovement").forGetter(ServerAnimation::aabbMovement)
@@ -33,11 +29,24 @@ public record ServerAnimation(
             ResourceLocation.CODEC.fieldOf("animationLocation").forGetter(ServerAnimation::animationLocation),
             Codec.STRING.optionalFieldOf("name").forGetter(ServerAnimation::name),
             Codec.INT.fieldOf("priority").forGetter(ServerAnimation::priority),
-            RideData.CODEC.optionalFieldOf("rideData").forGetter(ServerAnimation::rideData)
+            RideData.CODEC.optionalFieldOf("rideData").forGetter(ServerAnimation::rideData),
+            Codec.BOOL.fieldOf("defaultThirdPerson").forGetter(ServerAnimation::defaultThirdPerson)
     ).apply(i, ServerAnimation::new));
+    public ServerAnimation(ResourceLocation animationLocation, Optional<String> name, int priority, Optional<RideData> data, boolean defaultThirdPerson, float jumpModifier, TreeMap<Integer, AABBData> aabbMovement) {
+        super(animationLocation, name, priority, data, defaultThirdPerson);
+        this.jumpModifier = jumpModifier;
+        this.aabbMovement = aabbMovement;
+    }
+    public ServerAnimation(ResourceLocation animationLocation, Optional<String> name, int priority, Optional<RideData> data, boolean defaultThirdPerson) {
+        this(animationLocation, name, priority, data, defaultThirdPerson, 1.0f, new TreeMap<>());
+    }
 
-    public ServerAnimation(ResourceLocation animationLocation, Optional<String> name, int priority, Optional<RideData> data) {
-        this(animationLocation, name, priority, data, 1.0f, new TreeMap<>());
+    public float jumpModifier() {
+        return jumpModifier;
+    }
+
+    public TreeMap<Integer, AABBData> aabbMovement() {
+        return aabbMovement;
     }
 
     public @Nullable String getName() {

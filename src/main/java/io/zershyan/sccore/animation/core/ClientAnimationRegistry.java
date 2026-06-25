@@ -103,7 +103,7 @@ public class ClientAnimationRegistry {
      * @param layers 需要注册的Layer层
      */
     public static void registerLayers(Map<ResourceLocation, Integer> layers) {
-        ((IMixinFactoryHolder)(PlayerAnimationFactory.ANIMATION_DATA_FACTORY)).sccore$clearAnimations(layers.keySet());
+        IMixinFactoryHolder.of(PlayerAnimationFactory.ANIMATION_DATA_FACTORY).sccore$clearAnimations(layers.keySet());
         Minecraft instance = Minecraft.getInstance();
         layers.forEach((key, value) -> PlayerAnimationFactory.ANIMATION_DATA_FACTORY.registerFactory(
                 key, value, player -> {
@@ -160,7 +160,17 @@ public class ClientAnimationRegistry {
     public static KeyframeAnimation getKeyframeAnimation(ResourceLocation location) {
         ClientAnimation animation = getAnimation(location);
         if(animation == null) return null;
-        return  (KeyframeAnimation) PlayerAnimationRegistry.getAnimation(animation.animationLocation());
+        return (KeyframeAnimation) PlayerAnimationRegistry.getAnimation(animation.animationLocation());
+    }
+
+    @Nullable
+    public static KeyframeAnimation getKeyframeAnimation(ClientAnimation animation) {
+        return (KeyframeAnimation) PlayerAnimationRegistry.getAnimation(animation.animationLocation());
+    }
+
+    @Nullable
+    public static Boolean isServerAnimation(ResourceLocation location) {
+        return SyncAnimationFactory.getAnimations().containsKey(location) || Animations.containsKey(location) ? false : null;
     }
 
     /**

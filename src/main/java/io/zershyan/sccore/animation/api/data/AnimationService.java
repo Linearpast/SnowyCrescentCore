@@ -41,6 +41,8 @@ public class AnimationService implements IAnimationService {
      */
     @Override
     public void setData(PlayerAnimations data) {
+        PlayerAnimations oldData = getData();
+
         player.setData(type(), data);
     }
 

@@ -30,6 +30,9 @@ public record PlayerAnimations(RideAnim rideAnim, HashMap<ResourceLocation, Reso
         public RideAnim() {
             this(Optional.empty(), Optional.empty());
         }
+        public static RideAnim of(ResourceLocation layer, ResourceLocation animLoc) {
+            return new RideAnim(Optional.of(layer), Optional.of(animLoc));
+        }
         @Override
         public boolean equals(Object obj) {
             if(obj instanceof RideAnim(Optional<ResourceLocation> otherLayer, Optional<ResourceLocation> otherAnim)) {
