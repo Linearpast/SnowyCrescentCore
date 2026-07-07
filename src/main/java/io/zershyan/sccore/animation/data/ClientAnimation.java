@@ -32,7 +32,7 @@ public class ClientAnimation extends Animation {
             Codec.BOOL.fieldOf("defaultThirdPerson").forGetter(ClientAnimation::defaultThirdPerson)
     ).apply(i, ClientAnimation::new));
     public ClientAnimation(ResourceLocation animationLocation, Optional<String> name, int priority, Optional<RideData> rideData, boolean defaultThirdPerson, CameraChange firstPersonCameraChange, CameraChange cameraChange) {
-        super(animationLocation, name, priority, rideData, defaultThirdPerson);
+        super(animationLocation, name, priority, rideData, defaultThirdPerson, new TreeMap<>());
         this.firstPersonCameraChange = firstPersonCameraChange;
         this.cameraChange = cameraChange;
     }
@@ -43,7 +43,9 @@ public class ClientAnimation extends Animation {
         this(animationLocation, Optional.ofNullable(name), priority, Optional.ofNullable(data), defaultThirdPerson, new CameraChange(true), new CameraChange(false));
     }
     public ClientAnimation(ServerAnimation animation) {
-        this(animation.animationLocation(), animation.getName(), animation.priority(), animation.getRideData(), animation.defaultThirdPerson());
+        super(animation.animationLocation(), Optional.ofNullable(animation.getName()), animation.priority(), Optional.ofNullable(animation.getRideData()), animation.defaultThirdPerson(), animation.aabbMovement());
+        this.firstPersonCameraChange = new CameraChange(true);
+        this.cameraChange = new CameraChange(false);
     }
 
 

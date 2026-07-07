@@ -1,13 +1,18 @@
 package io.zershyan.sccore.animation.registry.entity;
 
+import io.zershyan.sccore.SCCore;
 import io.zershyan.sccore.animation.api.SCCAnimationApi;
 import io.zershyan.sccore.animation.api.data.AnimationHelper;
+import io.zershyan.sccore.animation.core.ServerAnimationRegistry;
+import io.zershyan.sccore.animation.core.SyncAnimationFactory;
 import io.zershyan.sccore.animation.data.Animation;
 import io.zershyan.sccore.animation.data.RideData;
 import io.zershyan.sccore.animation.data.ServerAnimation;
 import io.zershyan.sccore.animation.registry.AnimationEntities;
+import io.zershyan.sccore.animation.registry.AnimationEntityDataSerializers;
 import io.zershyan.sccore.animation.registry.attachment.PlayerAnimations;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -23,6 +28,18 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 public class AnimationRideEntity extends Entity {
+    private static final EntityDataAccessor<UUID> OWNER_UUID;
+    private static final EntityDataAccessor<ResourceLocation> LAYER;
+    private static final EntityDataAccessor<ResourceLocation> ANIMATION_ID;
+    private static final EntityDataAccessor<LinkedHashMap<ResourceLocation, UUID>> COMPONENT_PLAYERS_UUID;
+
+    static {
+        OWNER_UUID = SynchedEntityData.defineId(AnimationRideEntity.class, AnimationEntityDataSerializers.UUID.get());
+        LAYER = SynchedEntityData.defineId(AnimationRideEntity.class, AnimationEntityDataSerializers.RESOURCE_LOCATION.get());
+        ANIMATION_ID = SynchedEntityData.defineId(AnimationRideEntity.class, AnimationEntityDataSerializers.RESOURCE_LOCATION.get());
+        COMPONENT_PLAYERS_UUID = SynchedEntityData.defineId(AnimationRideEntity.class, AnimationEntityDataSerializers.RL_UUID_LINKED_MAP.get());
+    }
+
     public AnimationRideEntity(EntityType<? extends Entity> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.noPhysics = true;
@@ -38,16 +55,23 @@ public class AnimationRideEntity extends Entity {
         this.layer = layer;
         this.animation = animation;
         Optional<RideData> rideData = animation.animation().rideData();
+        LinkedHashMap<ResourceLocation, UUID> map = new LinkedHashMap<>();
         rideData.ifPresent(ride -> {
             List<ResourceLocation> componentAnimations = ride.componentAnimations();
             for (ResourceLocation componentAnimation : componentAnimations) {
                 componentPlayers.put(componentAnimation, null);
+                map.put(componentAnimation, null);
             }
         });
+
+        entityData.set(OWNER_UUID, getOwner().getUUID());
+        entityData.set(LAYER, layer);
+        entityData.set(ANIMATION_ID, animation.animLoc());
+        entityData.set(COMPONENT_PLAYERS_UUID, map);
     }
     public record RideAnimation(ResourceLocation animLoc, Animation animation) {}
 
-    private final Map<ResourceLocation, ServerPlayer> componentPlayers = new LinkedHashMap<>();
+    private final ComponentPlayer componentPlayers = new ComponentPlayer();
     private ResourceLocation layer;
     private RideAnimation animation;
     private ServerPlayer owner;
@@ -69,7 +93,12 @@ public class AnimationRideEntity extends Entity {
     }
 
     @Override
-    protected void defineSynchedData(SynchedEntityData.@NotNull Builder builder) {}
+    protected void defineSynchedData(SynchedEntityData.@NotNull Builder builder) {
+        builder.define(OWNER_UUID, new UUID(0, 0));
+        builder.define(LAYER, SCCore.id(""));
+        builder.define(ANIMATION_ID, SCCore.id(""));
+        builder.define(COMPONENT_PLAYERS_UUID, new LinkedHashMap<>());
+    }
 
     @Override
     protected void readAdditionalSaveData(@NotNull CompoundTag compoundTag) {}
@@ -196,6 +225,47 @@ public class AnimationRideEntity extends Entity {
             Map.copyOf(componentPlayers).forEach((location, player) -> {
                 if(player == serverPlayer) componentPlayers.remove(location);
             });
+        }
+    }
+
+    @Nullable
+    public Animation getServerAnimationOn(Player player) {
+        if(player.getUUID().equals(entityData.get(OWNER_UUID))) {
+            ResourceLocation animationId = entityData.get(ANIMATION_ID);
+            Animation anim = ServerAnimationRegistry.getAnimations().getOrDefault(animationId, null);
+            return anim == null ? SyncAnimationFactory.getAnimation(animationId) : anim;
+        }
+        ResourceLocation animLoc = null;
+        for (Map.Entry<ResourceLocation, UUID> entry : entityData.get(COMPONENT_PLAYERS_UUID).entrySet()) {
+            if(player.getUUID().equals(entry.getValue())) {
+                animLoc = entry.getKey();
+                break;
+            }
+        }
+        if(animLoc == null) return null;
+        Animation anim = ServerAnimationRegistry.getAnimations().getOrDefault(animLoc, null);
+        return anim == null ? SyncAnimationFactory.getAnimation(animLoc) : anim;
+    }
+
+    public class ComponentPlayer extends TreeMap<ResourceLocation, ServerPlayer> {
+        @Override
+        public ServerPlayer put(ResourceLocation key, ServerPlayer value) {
+            ServerPlayer put = super.put(key, value);
+            if(value == null) return put;
+            LinkedHashMap<ResourceLocation, UUID> map = entityData.get(COMPONENT_PLAYERS_UUID);
+            map.put(key, value.getUUID());
+            entityData.set(COMPONENT_PLAYERS_UUID, map);
+            return put;
+        }
+
+        @Override
+        public ServerPlayer remove(Object key) {
+            ServerPlayer remove = super.remove(key);
+            if(remove != null) {
+                LinkedHashMap<ResourceLocation, UUID> map = entityData.get(COMPONENT_PLAYERS_UUID);
+                if(map.remove(key) != null) entityData.set(COMPONENT_PLAYERS_UUID, map);
+            }
+            return remove;
         }
     }
 }

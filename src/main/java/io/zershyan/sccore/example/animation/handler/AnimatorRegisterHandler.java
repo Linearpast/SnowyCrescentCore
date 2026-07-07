@@ -9,12 +9,14 @@ import io.zershyan.sccore.animation.data.ServerAnimation;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.animal.Sheep;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.TreeMap;
 
 public class AnimatorRegisterHandler {
     private static final ResourceLocation testLayer = SCCore.id("test_layer");
@@ -28,9 +30,13 @@ public class AnimatorRegisterHandler {
     @SubscribeEvent
     public static void registerAnimation(AnimationRegisterEvent.Server event) {
 
+        TreeMap<Integer, AABB> aabbMovement = new TreeMap<>();
+        aabbMovement.put(0, new AABB(Vec3.ZERO, Vec3.ZERO));
+        aabbMovement.put(49, new AABB(Vec3.ZERO.add(5,5,5), Vec3.ZERO.add(5,5,5)));
         event.registerAnimation(testAnim, new ServerAnimation(
                 SCCore.id("waltz_lady"), Optional.of("华尔兹（女）"), 0,
-                Optional.of(new RideData(List.of(), Vec3.ZERO, 50, 0, 0)), true
+                Optional.of(new RideData(List.of(), Vec3.ZERO, 50, 0, 0)), true,
+                aabbMovement, 1.0f
         ));
     }
 

@@ -2,15 +2,19 @@ package io.zershyan.sccore.animation.api.data;
 
 import io.zershyan.sccore.SCCore;
 import io.zershyan.sccore.animation.api.SCCAnimationApi;
+import io.zershyan.sccore.animation.core.ClientAnimationRegistry;
 import io.zershyan.sccore.animation.core.ServerAnimationRegistry;
 import io.zershyan.sccore.animation.core.SyncAnimationFactory;
+import io.zershyan.sccore.animation.data.ClientAnimation;
 import io.zershyan.sccore.animation.registry.attachment.PlayerAnimations;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -22,6 +26,19 @@ import java.util.function.Function;
  * 通过 {@link Opera} 内部类实现链式调用，便于批量修改动画数据。
  */
 public class AnimationHelper {
+    static final Comparator<Map.Entry<ResourceLocation, ResourceLocation>> COMPARATOR;
+
+    static {
+        Comparator<Map.Entry<ResourceLocation, ResourceLocation>> comparingInt = Comparator.comparingInt(entry -> {
+            ClientAnimation animation = SyncAnimationFactory.getAnimation(entry.getValue());
+            if (animation == null) return Integer.MIN_VALUE;
+            if (animation.aabbMovement().isEmpty()) return Integer.MIN_VALUE;
+            return animation.priority();
+        });
+        COMPARATOR = comparingInt.thenComparingInt(entry ->
+                ClientAnimationRegistry.getAllLayers().getOrDefault(entry.getKey(), Integer.MIN_VALUE));
+    }
+
     private final IAnimationService service;
 
     /**
@@ -47,6 +64,10 @@ public class AnimationHelper {
         } else {
             return new AnimationHelper(new ClientAnimationService(player));
         }
+    }
+
+    public Optional<Map.Entry<ResourceLocation, ResourceLocation>> getHighestPriorityAnimation() {
+        return service.getHighestPriorityAnimation();
     }
 
     /**

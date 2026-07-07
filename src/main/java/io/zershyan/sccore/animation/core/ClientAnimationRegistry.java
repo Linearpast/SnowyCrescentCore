@@ -8,15 +8,15 @@ import dev.kosmx.playerAnim.api.layered.AnimationStack;
 import dev.kosmx.playerAnim.api.layered.IAnimation;
 import dev.kosmx.playerAnim.api.layered.KeyframeAnimationPlayer;
 import dev.kosmx.playerAnim.api.layered.ModifierLayer;
-import dev.kosmx.playerAnim.api.layered.modifier.AbstractFadeModifier;
 import dev.kosmx.playerAnim.core.data.KeyframeAnimation;
 import dev.kosmx.playerAnim.core.util.Ease;
 import dev.kosmx.playerAnim.core.util.Pair;
 import dev.kosmx.playerAnim.impl.animation.AnimationApplier;
-import dev.kosmx.playerAnim.minecraftApi.PlayerAnimationAccess;
 import dev.kosmx.playerAnim.minecraftApi.PlayerAnimationFactory;
 import dev.kosmx.playerAnim.minecraftApi.PlayerAnimationRegistry;
 import io.zershyan.sccore.SCCore;
+import io.zershyan.sccore.animation.api.SCCAnimationApi;
+import io.zershyan.sccore.animation.api.client.AnimationPlayerHelper;
 import io.zershyan.sccore.animation.api.events.AnimationRegisterEvent;
 import io.zershyan.sccore.animation.api.events.LayerRegisterEvent;
 import io.zershyan.sccore.animation.data.ClientAnimation;
@@ -217,16 +217,9 @@ public class ClientAnimationRegistry {
             data.rideAnim().layer().ifPresent(riderAnimLayer ->
                     dataAnimations.put(riderAnimLayer, data.rideAnim().animation().orElseThrow())
             );
-            for (ResourceLocation location : dataAnimations.keySet()) {
-                ModifierLayer<IAnimation> modifierLayer = (ModifierLayer<IAnimation>) PlayerAnimationAccess
-                        .getPlayerAssociatedData(player).get(location);
-                if(modifierLayer == null) continue;
-                KeyframeAnimation keyframeAnimation = getKeyframeAnimation(location);
-                if(keyframeAnimation == null) continue;
-                modifierLayer.replaceAnimationWithFade(
-                        AbstractFadeModifier.standardFadeIn(3, Ease.INOUTSINE),
-                        new KeyframeAnimationPlayer(keyframeAnimation)
-                );
+            AnimationPlayerHelper animPlayer = SCCAnimationApi.animPlayer(player);
+            for (ResourceLocation layer : dataAnimations.keySet()) {
+                animPlayer.innerPlayAnimation(3, Ease.INOUTSINE, layer, dataAnimations.get(layer));
             }
         }catch (Exception e){
             SCCore.log.error("Failed to register on {} animation layer: {}", player, e.getMessage(), e);

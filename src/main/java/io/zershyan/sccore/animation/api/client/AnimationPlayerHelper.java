@@ -7,15 +7,12 @@ import dev.kosmx.playerAnim.api.layered.modifier.AbstractFadeModifier;
 import dev.kosmx.playerAnim.core.data.KeyframeAnimation;
 import dev.kosmx.playerAnim.core.util.Ease;
 import dev.kosmx.playerAnim.minecraftApi.PlayerAnimationAccess;
-import io.zershyan.sccore.SCCore;
 import io.zershyan.sccore.animation.api.SCCAnimationApi;
 import io.zershyan.sccore.animation.core.ClientAnimationRegistry;
-import io.zershyan.sccore.animation.data.ClientAnimation;
 import io.zershyan.sccore.animation.imixin.IMixinKeyframeAnimationPlayer;
 import io.zershyan.sccore.animation.registry.attachment.PlayerAnimations;
 import io.zershyan.sccore.common.datagen.init.SCCTranslatableLang;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.LocalPlayer;
@@ -33,6 +30,26 @@ import java.util.Optional;
  * 提供在客户端播放和管理玩家动画的便捷方法，包括播放动画、移除动画以及更新动画状态。
  */
 public class AnimationPlayerHelper {
+//    private static final TreeMap<Integer, KeyframeAnimationPlayer> PlayingServerAnim = new TreeMap<>() {
+//        @Override
+//        public KeyframeAnimationPlayer put(Integer key, KeyframeAnimationPlayer value) {
+//            while (containsKey(key)) key++;
+//            PacketDistributor.sendToServer(new AABBMovementData(key, Optional.of(new AABBMovement(
+//                    value.getData().beginTick, value.getData().endTick, value.getData().stopTick, value.getData().stopTick
+//            ))));
+//            return super.put(key, value);
+//        }
+//
+//        @Override
+//        public KeyframeAnimationPlayer remove(Object key) {
+//            if(!(key instanceof Integer integer)) return null;
+//            KeyframeAnimationPlayer remove = super.remove(integer);
+//            if(remove != null) {
+//                PacketDistributor.sendToServer(new AABBMovementData(integer, Optional.empty()));
+//            }
+//            return remove;
+//        }
+//    };
     private final AbstractClientPlayer player;
 
     /**
@@ -95,47 +112,52 @@ public class AnimationPlayerHelper {
         innerPlayAnimation(layer, null);
     }
 
-    @SuppressWarnings("unchecked")
     private void innerPlayAnimation(ResourceLocation layer, @Nullable ResourceLocation animationId) {
-        try {
-            Minecraft instance = Minecraft.getInstance();
-            LocalPlayer localPlayer = instance.player;
-            ModifierLayer<IAnimation> modifierLayer = (ModifierLayer<IAnimation>) PlayerAnimationAccess
-                    .getPlayerAssociatedData(player).get(layer);
-            if(modifierLayer == null) return;
-            if(animationId == null) {
-                modifierLayer.replaceAnimationWithFade(AbstractFadeModifier.standardFadeIn(
-                        3, Ease.INOUTSINE), null);
-                return;
-            }
-            ClientAnimation animation = ClientAnimationRegistry.getAnimation(animationId);
-            if(animation == null) return;
-            if(animation.defaultThirdPerson()) instance.options.setCameraType(CameraType.THIRD_PERSON_BACK);
+        innerPlayAnimation(3, Ease.INOUTSINE, layer, animationId);
+    }
+
+    @SuppressWarnings("unchecked")
+    public void innerPlayAnimation(int fadeLength, Ease ease, ResourceLocation layer, @Nullable ResourceLocation animation) {
+        ModifierLayer<IAnimation> modifierLayer = (ModifierLayer<IAnimation>) PlayerAnimationAccess
+                .getPlayerAssociatedData(player).get(layer);
+        if(modifierLayer == null) return;
+        KeyframeAnimationPlayer iAnimation = null;
+        Minecraft instance = Minecraft.getInstance();
+        LocalPlayer localPlayer = instance.player;
+        if(animation != null) {
             KeyframeAnimation keyframeAnimation = ClientAnimationRegistry.getKeyframeAnimation(animation);
-            if(keyframeAnimation == null) {
-                if(localPlayer == null) return;
+            iAnimation = keyframeAnimation != null ? new KeyframeAnimationPlayer(keyframeAnimation) : null;
+            if(keyframeAnimation == null && localPlayer != null) {
                 localPlayer.sendSystemMessage(Component.translatable(
                         SCCTranslatableLang.ANIMATION_RESOURCE_NOT_FOUND.getKey(),
-                        animationId.toString()
+                        animation.toString()
                 ).withStyle(ChatFormatting.RED));
-                modifierLayer.replaceAnimationWithFade(
-                        AbstractFadeModifier.standardFadeIn(3, Ease.INOUTSINE),
-                        null
-                );
                 SCCAnimationApi.animation(player).operaData(opera -> opera
                         .removeClientAnim(layer)
                         .removeServerAnim(layer)
                         .endOpera()
                 );
-                return;
             }
-            modifierLayer.replaceAnimationWithFade(
-                    AbstractFadeModifier.standardFadeIn(3, Ease.INOUTSINE),
-                    new KeyframeAnimationPlayer(keyframeAnimation)
-            );
-        }catch (Exception e) {
-            SCCore.log.error("Failed to play animation : {}", animationId, e);
         }
+        KeyframeAnimationPlayer layerAnimation = (KeyframeAnimationPlayer) modifierLayer.getAnimation();
+        if(layerAnimation != null) layerAnimation.stop();
+//        if(localPlayer == player && (animation == null || Boolean.TRUE.equals(ClientAnimationRegistry.isServerAnimation(animation)))) {
+//            KeyframeAnimationPlayer oldAnimation = (KeyframeAnimationPlayer) modifierLayer.getAnimation();
+//            if(animation == null) {
+//                for (Integer integer : PlayingServerAnim.keySet()) {
+//                    if (PlayingServerAnim.get(integer) == oldAnimation) {
+//                        PlayingServerAnim.remove(integer);
+//                        break;
+//                    }
+//                }
+//            } else if(Boolean.TRUE.equals(ClientAnimationRegistry.isServerAnimation(animation))) {
+//                ClientAnimation clientAnimation = SyncAnimationFactory.getAnimation(animation);
+//                if(clientAnimation != null && iAnimation != null) {
+//                    PlayingServerAnim.put(clientAnimation.priority(), iAnimation);
+//                }
+//            }
+//        }
+        modifierLayer.replaceAnimationWithFade(AbstractFadeModifier.standardFadeIn(fadeLength, ease), iAnimation);
     }
 
     /**
@@ -145,8 +167,7 @@ public class AnimationPlayerHelper {
      *
      * @param newAnimations 新的动画数据
      */
-    public void updateAnimation(PlayerAnimations newAnimations) {
-        PlayerAnimations oldAnimations = SCCAnimationApi.animation(player).getData();
+    public void updateAnimation(PlayerAnimations oldAnimations, PlayerAnimations newAnimations) {
         if(oldAnimations == null || !newAnimations.rideAnim().equals(oldAnimations.rideAnim())) {
             PlayerAnimations.RideAnim newRideAnim = newAnimations.rideAnim();
             if(oldAnimations != null) oldAnimations.rideAnim().layer().ifPresent(this::removeAnimation);

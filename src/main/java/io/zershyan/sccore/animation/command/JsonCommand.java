@@ -72,7 +72,7 @@ public class JsonCommand {
             ServerAnimation serverAnimation = new ServerAnimation(
                     SCCore.id("animation_key"), Optional.of("测试动画"), 0,
                     Optional.of(new RideData(List.of(SCCore.id("sub_animation")), new Vec3(0, 0, 0), 100, 90, 0)), true,
-                    1.0f, new TreeMap<>(Map.of(1, new ServerAnimation.AABBData(1, new AABB(Vec3.ZERO, Vec3.ZERO.add(2.0, 2.0, 2.0)))))
+                     new TreeMap<>(Map.of(1, new AABB(Vec3.ZERO, Vec3.ZERO.add(2.0, 2.0, 2.0)))), 1.0f
             );
             JsonElement exampleServerAnimationJson = ServerAnimation.CODEC.encodeStart(JsonOps.INSTANCE, serverAnimation).getOrThrow();
             Files.writeString(serverAnimExample, gson.toJson(exampleServerAnimationJson), StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);

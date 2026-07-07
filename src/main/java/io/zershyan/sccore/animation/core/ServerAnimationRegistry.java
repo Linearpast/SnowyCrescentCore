@@ -7,6 +7,7 @@ import com.mojang.serialization.JsonOps;
 import io.zershyan.sccore.SCCore;
 import io.zershyan.sccore.animation.api.events.AnimationRegisterEvent;
 import io.zershyan.sccore.animation.api.events.LayerRegisterEvent;
+import io.zershyan.sccore.animation.data.Animation;
 import io.zershyan.sccore.animation.data.ServerAnimation;
 import io.zershyan.sccore.animation.network.data.RegisterAnimationData;
 import io.zershyan.sccore.animation.network.data.RegisterLayerData;
@@ -21,6 +22,7 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.server.ServerAboutToStartEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.BufferedReader;
 import java.util.HashMap;
@@ -95,6 +97,12 @@ public class ServerAnimationRegistry {
     private static void sendDataToPlayer(ServerPlayer player) {
         PacketDistributor.sendToPlayer(player, new RegisterLayerData(new HashMap<>(Layers)));
         PacketDistributor.sendToPlayer(player, new RegisterAnimationData(new HashMap<>(Animations)));
+    }
+
+    @Nullable
+    public static Animation commonGetAnimation(ResourceLocation animationLocation) {
+        if(Animations.containsKey(animationLocation)) return Animations.get(animationLocation);
+        else return SyncAnimationFactory.getAnimation(animationLocation);
     }
 
     public static Map<ResourceLocation, Integer> getLayers() {

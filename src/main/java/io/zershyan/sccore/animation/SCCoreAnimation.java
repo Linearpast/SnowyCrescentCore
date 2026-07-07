@@ -4,10 +4,12 @@ import io.zershyan.sccore.animation.core.ClientAnimationRegistry;
 import io.zershyan.sccore.animation.core.ServerAnimationRegistry;
 import io.zershyan.sccore.animation.network.data.*;
 import io.zershyan.sccore.animation.network.handler.ClientPayloadHandler;
+import io.zershyan.sccore.animation.network.handler.CommonPayloadHandler;
 import io.zershyan.sccore.animation.network.handler.ServerPayloadHandler;
 import io.zershyan.sccore.animation.registry.AnimationAttachments;
 import io.zershyan.sccore.animation.registry.AnimationCommands;
 import io.zershyan.sccore.animation.registry.AnimationEntities;
+import io.zershyan.sccore.animation.registry.AnimationEntityDataSerializers;
 import io.zershyan.sccore.api.ICompatUtils;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
@@ -28,12 +30,17 @@ public class SCCoreAnimation extends ICompatUtils {
     protected void addCommonListener(IEventBus forgeBus, IEventBus modBus) {
         forgeBus.register(ServerAnimationRegistry.class);
         forgeBus.addListener(AnimationCommands::commonCommandRegister);
-        AnimationAttachments.register(modBus);
+
         AnimationEntities.register(modBus);
+        AnimationAttachments.register(modBus);
+        AnimationEntityDataSerializers.register(modBus);
     }
 
     @Override
     public void registerNetwork(PayloadRegistrar registrar) {
+        //common
+        registrar.playBidirectional(MovementAnimationTickData.TYPE, MovementAnimationTickData.STREAM_CODEC, CommonPayloadHandler::movementAnimationTick);
+
         //server
         registrar.playToServer(UpdateAnimationData.TYPE, UpdateAnimationData.STREAM_CODEC, ServerPayloadHandler::updateAnimMap);
         registrar.playToServer(UpdateRideAnimationData.TYPE, UpdateRideAnimationData.STREAM_CODEC, ServerPayloadHandler::updateRideAnim);

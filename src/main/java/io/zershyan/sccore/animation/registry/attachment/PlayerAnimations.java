@@ -5,7 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.netty.buffer.ByteBuf;
 import io.zershyan.sccore.animation.api.SCCAnimationApi;
 import io.zershyan.sccore.animation.registry.AnimationAttachments;
-import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -73,7 +73,8 @@ public record PlayerAnimations(RideAnim rideAnim, HashMap<ResourceLocation, Reso
         @Override
         public PlayerAnimations read(@NotNull IAttachmentHolder holder, @NotNull RegistryFriendlyByteBuf buf, @Nullable PlayerAnimations oldAnimations) {
             PlayerAnimations newAnimations = ByteBufCodecs.fromCodecWithRegistries(CODEC).decode(buf);
-            SCCAnimationApi.animPlayer(Minecraft.getInstance().player).updateAnimation(newAnimations);
+            if(!(holder instanceof AbstractClientPlayer player)) return newAnimations;
+            SCCAnimationApi.animPlayer(player).updateAnimation(oldAnimations, newAnimations);
             return newAnimations;
         }
     };

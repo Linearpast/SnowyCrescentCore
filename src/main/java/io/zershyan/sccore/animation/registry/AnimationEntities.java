@@ -14,7 +14,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 import java.util.function.Supplier;
 
 public class AnimationEntities {
-    public static final DeferredRegister<EntityType<?>> REGISTER = DeferredRegister.create(Registries.ENTITY_TYPE, SCCore.MODID);
+    public static final DeferredRegister<EntityType<?>> REGISTRY = DeferredRegister.create(Registries.ENTITY_TYPE, SCCore.MODID);
 
     public static final Supplier<EntityType<AnimationRideEntity>> RIDE = register(
             "animation_ride_entity", EntityType.Builder.<AnimationRideEntity>of(AnimationRideEntity::new, MobCategory.MISC)
@@ -22,11 +22,11 @@ public class AnimationEntities {
     );
 
     private static <T extends Entity> Supplier<EntityType<T>> register(String name, EntityType.Builder<T> builder) {
-        return REGISTER.register(name, () -> builder.build(name));
+        return REGISTRY.register(name, () -> builder.build(name));
     }
 
     public static void register(IEventBus modBus){
-        REGISTER.register(modBus);
+        REGISTRY.register(modBus);
         modBus.addListener(AnimationEntities::registerRenderer);
     }
 
