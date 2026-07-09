@@ -1,9 +1,6 @@
 package io.zershyan.sccore.animation.handler.client;
 
-import dev.kosmx.playerAnim.api.layered.IAnimation;
 import dev.kosmx.playerAnim.api.layered.KeyframeAnimationPlayer;
-import dev.kosmx.playerAnim.api.layered.ModifierLayer;
-import dev.kosmx.playerAnim.minecraftApi.PlayerAnimationAccess;
 import io.zershyan.sccore.SCCore;
 import io.zershyan.sccore.animation.api.SCCAnimationApi;
 import io.zershyan.sccore.animation.network.data.MovementAnimationTickData;
@@ -23,7 +20,6 @@ import java.util.Optional;
 public class AnimationPlayerHandler {
     private static KeyframeAnimationPlayer currentAnimation;
 
-    @SuppressWarnings("unchecked")
     @SubscribeEvent
     public static void sendAnimationTick(ClientTickEvent.Pre event) {
         try {
@@ -33,10 +29,7 @@ public class AnimationPlayerHandler {
             Optional<Map.Entry<ResourceLocation, ResourceLocation>> max = SCCAnimationApi.animation(player).getHighestPriorityAnimation();
             if(max.isEmpty()) return;
             Map.Entry<ResourceLocation, ResourceLocation> entry = max.get();
-            ModifierLayer<IAnimation> modifierLayer  = (ModifierLayer<IAnimation>) PlayerAnimationAccess
-                    .getPlayerAssociatedData(player).get(entry.getKey());
-            if(modifierLayer == null) return;
-            currentAnimation = (KeyframeAnimationPlayer) modifierLayer.getAnimation();
+            currentAnimation = SCCAnimationApi.animPlayer(player).getKeyframeAnimationPlayer(entry.getKey());
             if(currentAnimation == null) return;
             int currentTick = currentAnimation.getCurrentTick();
             MovementAnimationTickData movementAnimationTickData = new MovementAnimationTickData(player.getUUID(), Optional.of(entry.getValue()), currentTick);

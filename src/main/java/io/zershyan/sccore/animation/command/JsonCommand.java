@@ -6,10 +6,10 @@ import com.google.gson.JsonElement;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.serialization.JsonOps;
-import dev.kosmx.playerAnim.core.util.Vec3f;
 import io.zershyan.sccore.SCCore;
 import io.zershyan.sccore.animation.core.ClientAnimationRegistry;
 import io.zershyan.sccore.animation.data.ClientAnimation;
+import io.zershyan.sccore.animation.data.EulerAngle;
 import io.zershyan.sccore.animation.data.RideData;
 import io.zershyan.sccore.animation.data.ServerAnimation;
 import io.zershyan.sccore.common.datagen.init.SCCTranslatableLang;
@@ -56,8 +56,8 @@ public class JsonCommand {
             if(!Files.exists(clientAnimExample)) Files.createFile(clientAnimExample);
             TreeMap<Integer, ClientAnimation.CameraData> movement = new TreeMap<>();
             TreeMap<Integer, ClientAnimation.CameraData> movement1 = new TreeMap<>();
-            movement.put(1, new ClientAnimation.CameraData(1, Vec3.ZERO, Vec3f.ZERO));
-            movement1.put(2, new ClientAnimation.CameraData(2, Vec3.ZERO, Vec3f.ZERO));
+            movement.put(1, new ClientAnimation.CameraData(Vec3.ZERO, EulerAngle.ZERO));
+            movement1.put(2, new ClientAnimation.CameraData(Vec3.ZERO, EulerAngle.ZERO));
             ClientAnimation clientAnimation = new ClientAnimation(
                     SCCore.id("animation_key"), Optional.of("测试动画"), 0,
                     Optional.of(new RideData(List.of(SCCore.id("sub_animation")), new Vec3(0, 0, 0), 100, 90, 0)), true,

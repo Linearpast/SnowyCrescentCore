@@ -3,7 +3,6 @@ package io.zershyan.sccore.animation.api.data;
 import io.zershyan.sccore.animation.registry.attachment.PlayerAnimations;
 import net.minecraft.resources.ResourceLocation;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -27,10 +26,5 @@ public interface IAnimationService {
      */
     void setData(PlayerAnimations data);
 
-    default Optional<Map.Entry<ResourceLocation, ResourceLocation>> getHighestPriorityAnimation() {
-        PlayerAnimations data = getData();
-        HashMap<ResourceLocation, ResourceLocation> serverAnimMap = new HashMap<>(data.serverAnimMap());
-        data.rideAnim().layer().ifPresent(layer -> serverAnimMap.put(layer, data.rideAnim().animation().orElseThrow()));
-        return serverAnimMap.entrySet().stream().max(AnimationHelper.COMPARATOR);
-    }
+    Optional<Map.Entry<ResourceLocation, ResourceLocation>> getHighestPriorityAnimation();
 }

@@ -14,6 +14,8 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.network.PacketDistributor;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -65,5 +67,16 @@ public class ClientAnimationService implements IAnimationService {
         PacketDistributor.sendToServer(new UpdateRideAnimationData(data.rideAnim().layer(), either));
         PacketDistributor.sendToServer(new UpdateAnimationData(data.clientAnimMap(), false));
         PacketDistributor.sendToServer(new UpdateAnimationData(data.serverAnimMap(), true));
+    }
+
+    @Override
+    public Optional<Map.Entry<ResourceLocation, ResourceLocation>> getHighestPriorityAnimation() {
+        PlayerAnimations data = getData();
+        HashMap<ResourceLocation, ResourceLocation> clientAnimMap = new HashMap<>(data.clientAnimMap());
+        Optional<Map.Entry<ResourceLocation, ResourceLocation>> max = clientAnimMap.entrySet().stream().max(AnimationHelper.COMPARATOR);
+        if(max.isPresent()) return max;
+        HashMap<ResourceLocation, ResourceLocation> serverAnimMap = new HashMap<>(data.clientAnimMap());
+        data.rideAnim().layer().ifPresent(layer -> serverAnimMap.put(layer, data.rideAnim().animation().orElseThrow()));
+        return serverAnimMap.entrySet().stream().max(AnimationHelper.COMPARATOR);
     }
 }

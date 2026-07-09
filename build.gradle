@@ -128,7 +128,7 @@ dependencies {
     implementation "io.github.kosmx.bendy-lib:bendy-lib-forge:5.1"
 
     if(!project.gradle.startParameter.taskNames.any { "runServer" in it }) {
-//        runtimeOnly "curse.maven:freecam-by-zergatul-618947:5591136"
+        runtimeOnly "curse.maven:freecam-by-zergatul-618947:5591136"
         runtimeOnly "curse.maven:jade-324717:7545219"
     }
 

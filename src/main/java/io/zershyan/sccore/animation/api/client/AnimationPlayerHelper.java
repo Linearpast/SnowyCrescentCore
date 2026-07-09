@@ -205,4 +205,13 @@ public class AnimationPlayerHelper {
             }
         }
     }
+
+    @Nullable
+    @SuppressWarnings("unchecked")
+    public KeyframeAnimationPlayer getKeyframeAnimationPlayer(ResourceLocation layer) {
+        ModifierLayer<IAnimation> modifierLayer  = (ModifierLayer<IAnimation>) PlayerAnimationAccess
+                .getPlayerAssociatedData(player).get(layer);
+        if(modifierLayer == null) return null;
+        return (KeyframeAnimationPlayer) modifierLayer.getAnimation();
+    }
 }

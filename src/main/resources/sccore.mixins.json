@@ -6,12 +6,15 @@
 	"refmap": "sccore.refmap.json",
 	"plugin": "io.zershyan.sccore.mixin.SCCoreMixinPlugin",
 	"mixins": [
+		"playeranimator.client.MixinEntity",
 		"playeranimator.common.MixinEntity",
 		"playeranimator.common.MixinLivingEntity",
 		"sccore.common.MixinMinecraftServer"
 	],
 	"client": [
+		"playeranimator.client.MixinCamera",
 		"playeranimator.client.MixinFactoryHolder",
+		"playeranimator.client.MixinHumanoidModel",
 		"playeranimator.client.MixinKeyframeAnimationPlayer",
 		"sccore.client.MixinMinecraft"
 	],

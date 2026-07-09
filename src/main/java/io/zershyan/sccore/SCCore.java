@@ -2,12 +2,17 @@ package io.zershyan.sccore;
 
 
 import com.mojang.logging.LogUtils;
+import io.zershyan.sccore.animation.handler.client.CameraTransformStateHandler;
 import io.zershyan.sccore.common.configs.StartupConfig;
 import io.zershyan.sccore.common.registry.SCCCommands;
 import io.zershyan.sccore.common.registry.SCCConfigs;
 import io.zershyan.sccore.compat.SCCoreCompat;
 import io.zershyan.sccore.example.animation.ExampleAnimations;
 import io.zershyan.sccore.example.patchouli.ExamplePatchouli;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
@@ -52,5 +57,15 @@ public class SCCore {
                 ExampleAnimations.registerClient(neoEventBus);
             }
         }
+    }
+
+    public static void func(HumanoidModel<?> model, float yaw, float pitch) {
+        ModelPart head = model.head;
+        head.xRot = 0;
+        head.yRot = 0;
+        LocalPlayer player = Minecraft.getInstance().player;
+        if(player == null) return;
+        CameraTransformStateHandler.Snapshot snapshot = CameraTransformStateHandler.get(player.getUUID(), true);
+
     }
 }
