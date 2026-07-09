@@ -26,15 +26,10 @@ public class ClientAnimatorRegisterHandler {
     @SubscribeEvent
     public static void registerAnimationClient(AnimationRegisterEvent.Client event) {
         TreeMap<Integer, ClientAnimation.CameraData> movement = new TreeMap<>();
-        movement.put(0, new ClientAnimation.CameraData(new Vec3(0,-1.5,0), new EulerAngle(-90f, 0f,0)));
-//        movement.put(20, new ClientAnimation.CameraData(Vec3.ZERO, new Vec3f(90f,0f,0f)));
-//        movement.put(40, new ClientAnimation.CameraData(Vec3.ZERO, new Vec3f(0f,90f,0f)));
-        movement.put(60, new ClientAnimation.CameraData(new Vec3(0,-1.5,0), new EulerAngle(-90f,0f,0)));
-        event.registerAnimation(testAnimClient, new ClientAnimation(
-                SCCore.id("am_lying_to_right_lying"), "华尔兹（男）", 0, null, false,
-                new ClientAnimation.CameraChange(false, movement),
-                new ClientAnimation.CameraChange(false)
-        ));
+        movement.put(0, new ClientAnimation.CameraData(new Vec3(0,-1.5,0), new EulerAngle(0f, 90f,90f)));
+        event.createAnimation(testAnimClient, SCCore.id("am_lying_to_right_lying"))
+                .firstPersonCameraChange(new ClientAnimation.CameraChange(false, movement))
+                .name("华尔兹（男）");
     }
 
     @SubscribeEvent

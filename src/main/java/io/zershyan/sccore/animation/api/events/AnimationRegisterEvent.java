@@ -1,5 +1,6 @@
 package io.zershyan.sccore.animation.api.events;
 
+import io.zershyan.sccore.animation.api.utils.AnimationBuilder;
 import io.zershyan.sccore.animation.data.ClientAnimation;
 import io.zershyan.sccore.animation.data.ServerAnimation;
 import net.minecraft.resources.ResourceLocation;
@@ -20,7 +21,7 @@ public abstract class AnimationRegisterEvent extends Event {
      * 在客户端初始化时触发，用于注册客户端专属的动画。
      */
     public static class Client extends AnimationRegisterEvent {
-        private final Map<ResourceLocation, ClientAnimation> animations = new HashMap<>();
+        private final Map<ResourceLocation, AnimationBuilder.Client> animations = new HashMap<>();
 
         /**
          * 获取已注册的客户端动画映射。
@@ -28,17 +29,23 @@ public abstract class AnimationRegisterEvent extends Event {
          * @return 动画资源位置到客户端动画对象的映射
          */
         public Map<ResourceLocation, ClientAnimation> getAnimations() {
-            return new HashMap<>(animations);
+            Map<ResourceLocation, ClientAnimation> animationMap = new HashMap<>();
+            for (Map.Entry<ResourceLocation, AnimationBuilder.Client> entry : animations.entrySet()) {
+                animationMap.put(entry.getKey(), entry.getValue().build());
+            }
+            return animationMap;
         }
 
         /**
          * 注册客户端动画。
          *
-         * @param location 动画的资源位置
-         * @param animation 客户端动画对象
+         * @param location 动画的资源标识符
+         * @param animationLocation 动画资源位置
          */
-        public void registerAnimation(ResourceLocation location, ClientAnimation animation) {
-            animations.put(location, animation);
+        public AnimationBuilder.Client createAnimation(ResourceLocation location, ResourceLocation animationLocation) {
+            AnimationBuilder.Client builder = AnimationBuilder.Client.builder(animationLocation);
+            animations.put(location, builder);
+            return builder;
         }
     }
 
@@ -48,7 +55,7 @@ public abstract class AnimationRegisterEvent extends Event {
      * 在服务端初始化时触发，用于注册服务端专属的动画。
      */
     public static class Server extends AnimationRegisterEvent {
-        private final Map<ResourceLocation, ServerAnimation> animations = new HashMap<>();
+        private final Map<ResourceLocation, AnimationBuilder.Server> animations = new HashMap<>();
 
         /**
          * 获取已注册的服务端动画映射。
@@ -56,17 +63,23 @@ public abstract class AnimationRegisterEvent extends Event {
          * @return 动画资源位置到服务端动画对象的映射
          */
         public Map<ResourceLocation, ServerAnimation> getAnimations() {
-            return new HashMap<>(animations);
+            Map<ResourceLocation, ServerAnimation> animationMap = new HashMap<>();
+            for (Map.Entry<ResourceLocation, AnimationBuilder.Server> entry : animations.entrySet()) {
+                animationMap.put(entry.getKey(), entry.getValue().build());
+            }
+            return animationMap;
         }
 
         /**
          * 注册服务端动画。
          *
-         * @param location 动画的资源位置
-         * @param animation 服务端动画对象
+         * @param location 动画的资源标识符
+         * @param animationLocation 动画资源位置
          */
-        public void registerAnimation(ResourceLocation location, ServerAnimation animation) {
-            animations.put(location, animation);
+        public AnimationBuilder.Server createAnimation(ResourceLocation location, ResourceLocation animationLocation) {
+            AnimationBuilder.Server builder = AnimationBuilder.Server.builder(animationLocation);
+            animations.put(location, builder);
+            return builder;
         }
     }
 }

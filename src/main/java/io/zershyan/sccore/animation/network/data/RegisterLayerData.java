@@ -2,7 +2,7 @@ package io.zershyan.sccore.animation.network.data;
 
 import io.netty.buffer.ByteBuf;
 import io.zershyan.sccore.SCCore;
-import io.zershyan.sccore.animation.core.ServerAnimationRegistry;
+import io.zershyan.sccore.animation.core.SyncAnimationFactory;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -16,7 +16,7 @@ public record RegisterLayerData(HashMap<ResourceLocation, Integer> layers) imple
             new CustomPacketPayload.Type<>(SCCore.id("animator_layers"));
 
     public static final StreamCodec<ByteBuf, RegisterLayerData> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.fromCodec(ServerAnimationRegistry.LAYER_CODEC),
+            ByteBufCodecs.fromCodec(SyncAnimationFactory.LAYER_CODEC),
             RegisterLayerData::layers, RegisterLayerData::new
     );
 

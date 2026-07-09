@@ -8,6 +8,8 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.serialization.JsonOps;
 import io.zershyan.sccore.SCCore;
 import io.zershyan.sccore.animation.core.ClientAnimationRegistry;
+import io.zershyan.sccore.animation.core.ServerAnimationRegistry;
+import io.zershyan.sccore.animation.core.SyncAnimationFactory;
 import io.zershyan.sccore.animation.data.ClientAnimation;
 import io.zershyan.sccore.animation.data.EulerAngle;
 import io.zershyan.sccore.animation.data.RideData;
@@ -49,7 +51,7 @@ public class JsonCommand {
             HashMap<ResourceLocation, Integer> exampleLayer = new HashMap<>();
             exampleLayer.put(SCCore.id("example_layer"), 40);
             exampleLayer.put(ResourceLocation.fromNamespaceAndPath("your_namespace", "example_layer"), 41);
-            JsonElement exampleLayerJson = ClientAnimationRegistry.LAYER_CODEC.encodeStart(JsonOps.INSTANCE, exampleLayer).getOrThrow();
+            JsonElement exampleLayerJson = SyncAnimationFactory.LAYER_CODEC.encodeStart(JsonOps.INSTANCE, exampleLayer).getOrThrow();
             Files.writeString(layerExample, gson.toJson(exampleLayerJson), StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);
 
             Path clientAnimExample = dir.resolve("example_client_animation.json");
@@ -64,7 +66,7 @@ public class JsonCommand {
                     new ClientAnimation.CameraChange(true, movement),
                     new ClientAnimation.CameraChange(false, movement1)
             );
-            JsonElement exampleClientAnimationJson = ClientAnimation.CODEC.encodeStart(JsonOps.INSTANCE, clientAnimation).getOrThrow();
+            JsonElement exampleClientAnimationJson = ClientAnimationRegistry.CLIENT_ANIMATION_CODEC.encodeStart(JsonOps.INSTANCE, clientAnimation).getOrThrow();
             Files.writeString(clientAnimExample, gson.toJson(exampleClientAnimationJson), StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);
 
             Path serverAnimExample = dir.resolve("example_server_animation.json");
@@ -74,7 +76,7 @@ public class JsonCommand {
                     Optional.of(new RideData(List.of(SCCore.id("sub_animation")), new Vec3(0, 0, 0), 100, 90, 0)), true,
                      new TreeMap<>(Map.of(1, new AABB(Vec3.ZERO, Vec3.ZERO.add(2.0, 2.0, 2.0)))), 1.0f
             );
-            JsonElement exampleServerAnimationJson = ServerAnimation.CODEC.encodeStart(JsonOps.INSTANCE, serverAnimation).getOrThrow();
+            JsonElement exampleServerAnimationJson = ServerAnimationRegistry.SERVER_ANIMATION_CODEC.encodeStart(JsonOps.INSTANCE, serverAnimation).getOrThrow();
             Files.writeString(serverAnimExample, gson.toJson(exampleServerAnimationJson), StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);
             MutableComponent component = Component.translatable(
                     SCCTranslatableLang.ANIMATION_TO_JSON.getKey(),

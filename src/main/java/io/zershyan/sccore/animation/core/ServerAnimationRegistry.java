@@ -4,10 +4,12 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.zershyan.sccore.SCCore;
 import io.zershyan.sccore.animation.api.events.AnimationRegisterEvent;
 import io.zershyan.sccore.animation.api.events.LayerRegisterEvent;
 import io.zershyan.sccore.animation.data.Animation;
+import io.zershyan.sccore.animation.data.RideData;
 import io.zershyan.sccore.animation.data.ServerAnimation;
 import io.zershyan.sccore.animation.network.data.RegisterAnimationData;
 import io.zershyan.sccore.animation.network.data.RegisterLayerData;
@@ -17,6 +19,8 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
@@ -26,7 +30,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.BufferedReader;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.function.Function;
 
 public class ServerAnimationRegistry {
@@ -34,9 +40,21 @@ public class ServerAnimationRegistry {
     private static final Map<ResourceLocation, ServerAnimation> Animations = new HashMap<>();
     public static final String LAYER_DIR = "animation/layer/";
     public static final String ANIMATION_DIR = "animation/animation/";
-    public static final Codec<HashMap<ResourceLocation, Integer>> LAYER_CODEC = Codec.unboundedMap(
-            ResourceLocation.CODEC, Codec.INT
-    ).xmap(HashMap::new, Function.identity());
+
+    public static final Codec<ServerAnimation> SERVER_ANIMATION_CODEC = RecordCodecBuilder.create(i -> i.group(
+            ResourceLocation.CODEC.fieldOf("animationLocation").forGetter(Animation::animationLocation),
+            Codec.STRING.optionalFieldOf("name").forGetter(Animation::name),
+            Codec.INT.optionalFieldOf("priority", 0).forGetter(Animation::priority),
+            RideData.CODEC.optionalFieldOf("rideData").forGetter(Animation::rideData),
+            Codec.BOOL.optionalFieldOf("defaultThirdPerson", false).forGetter(Animation::defaultThirdPerson),
+            Codec.unboundedMap(Codec.STRING.xmap(Integer::parseInt, Object::toString), Vec3.CODEC.listOf(2, 2).xmap(
+                            vec3s -> new AABB(vec3s.getFirst(), vec3s.getLast()),
+                            ab -> List.of(new Vec3(ab.minX, ab.minY, ab.minZ), new Vec3(ab.maxX, ab.maxY, ab.maxZ))
+                    )).xmap(TreeMap::new, Function.identity())
+                    .optionalFieldOf("aabbMovement", new TreeMap<>())
+                    .forGetter(Animation::aabbMovement),
+            Codec.FLOAT.optionalFieldOf("jumpModifier", 1.0f).forGetter(ServerAnimation::jumpModifier)
+    ).apply(i, ServerAnimation::new));
 
     @SubscribeEvent
     public static void serverInit(ServerAboutToStartEvent event) {
@@ -72,7 +90,7 @@ public class ServerAnimationRegistry {
         for (Resource value : layerResourceMap.values()) {
             try (BufferedReader reader = value.openAsReader()){
                 JsonElement element = JsonParser.parseReader(reader);
-                Layers.putAll(LAYER_CODEC.parse(JsonOps.INSTANCE, element).getOrThrow());
+                Layers.putAll(SyncAnimationFactory.LAYER_CODEC.parse(JsonOps.INSTANCE, element).getOrThrow());
             } catch (Exception e) {
                 SCCore.log.error(e.getMessage());
             }
@@ -87,7 +105,7 @@ public class ServerAnimationRegistry {
         animationResourceMap.forEach((location, resource) -> {
             try (BufferedReader reader = resource.openAsReader()){
                 JsonElement element = JsonParser.parseReader(reader);
-                Animations.put(location, ServerAnimation.CODEC.parse(JsonOps.INSTANCE, element).getOrThrow());
+                Animations.put(location, SERVER_ANIMATION_CODEC.parse(JsonOps.INSTANCE, element).getOrThrow());
             } catch (Exception e) {
                 SCCore.log.error(e.getMessage());
             }

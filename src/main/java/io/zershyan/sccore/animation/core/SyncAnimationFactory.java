@@ -1,13 +1,18 @@
 package io.zershyan.sccore.animation.core;
 
+import com.mojang.serialization.Codec;
 import io.zershyan.sccore.animation.data.ClientAnimation;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 public class SyncAnimationFactory {
+    public static final Codec<HashMap<ResourceLocation, Integer>> LAYER_CODEC = Codec.unboundedMap(
+            ResourceLocation.CODEC, Codec.INT
+    ).xmap(HashMap::new, Function.identity());
     private static final Map<ResourceLocation, Integer> Layers = new HashMap<>();
     private static final Map<ResourceLocation, ClientAnimation> Animations = new HashMap<>();
 

@@ -14,7 +14,6 @@ import java.util.function.Function;
 
 public class ServerAnimation extends Animation {
     private final float jumpModifier;
-
     public static final Codec<ServerAnimation> CODEC = RecordCodecBuilder.create(i -> i.group(
             ResourceLocation.CODEC.fieldOf("animationLocation").forGetter(Animation::animationLocation),
             Codec.STRING.optionalFieldOf("name").forGetter(Animation::name),
@@ -27,7 +26,6 @@ public class ServerAnimation extends Animation {
                     )).xmap(TreeMap::new, Function.identity())
                     .fieldOf("aabbMovement").forGetter(Animation::aabbMovement),
             Codec.FLOAT.fieldOf("jumpModifier").forGetter(ServerAnimation::jumpModifier)
-
     ).apply(i, ServerAnimation::new));
     public static final Codec<ServerAnimation> SUB_CODEC = RecordCodecBuilder.create(i -> i.group(
             ResourceLocation.CODEC.fieldOf("animationLocation").forGetter(ServerAnimation::animationLocation),
