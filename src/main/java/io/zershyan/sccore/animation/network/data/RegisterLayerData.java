@@ -11,6 +11,11 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 
+/**
+ * 服务端 → 客户端：同步动画层注册表到客户端。
+ *
+ * @param layers 层资源位置 → 优先级的映射
+ */
 public record RegisterLayerData(HashMap<ResourceLocation, Integer> layers) implements CustomPacketPayload {
     public static final CustomPacketPayload.Type<@NotNull RegisterLayerData> TYPE =
             new CustomPacketPayload.Type<>(SCCore.id("animator_layers"));

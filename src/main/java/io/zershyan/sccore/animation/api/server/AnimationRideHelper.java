@@ -15,45 +15,64 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import java.util.Objects;
 
 /**
- * 动画骑乘助手类，用于管理服务器端玩家的动画骑乘行为。
+ * 服务端骑乘动画助手，用于创建与管理玩家协作骑乘动画。
+ *
+ * <p>通过生成不可见的 {@link AnimationRideEntity} 作为骑乘载体，将一名"车主"玩家与若干"组件"玩家
+ * 绑定到同一段骑乘动画上，实现多人骑乘动画的播放与同步。</p>
+ *
+ * <h3>典型用法</h3>
+ * <pre>{@code
+ * AnimationRideHelper helper = SCCAnimationApi.ridePlayer(serverPlayer);
+ *
+ * // 启动骑乘
+ * helper.startRide(layer, animLoc);
+ * helper.startRide(layer, animLoc, pos);       // 指定位置
+ * helper.startRide(layer, animLoc, pos, true); // 强制覆盖
+ *
+ * // 同步骑乘动画到目标玩家
+ * helper.syncRideAnim(targetPlayer);
+ *
+ * // 停止骑乘
+ * helper.stopRide();
+ * }</pre>
+ *
+ * @see AnimationRideEntity
+ * @see SCCAnimationApi#ridePlayer(ServerPlayer)
  */
 public class AnimationRideHelper {
-    /**
-     * 关联的服务器玩家
-     */
     private final ServerPlayer player;
 
     /**
-     * 构造动画骑乘助手。
+     * 私有构造，通过 {@link #of(ServerPlayer)} 创建实例。
      *
-     * @param player 服务器玩家
+     * @param player 车主玩家
      */
     private AnimationRideHelper(ServerPlayer player) {
         this.player = player;
     }
 
     /**
-     * 创建动画骑乘助手实例。
+     * 为指定服务端玩家创建骑乘动画助手。
      *
-     * @param player 服务器玩家
-     * @return 动画骑乘助手实例
+     * @param player 车主玩家
+     * @return 绑定该玩家的骑乘动画助手
      */
     public static AnimationRideHelper of(ServerPlayer player) {
         return new AnimationRideHelper(player);
     }
 
     /**
-     * 启动骑乘动画（使用客户端骑乘动画DTO）。
+     * 以客户端骑乘动画 DTO 启动骑乘，在玩家当前位置、非强制。
      *
      * @param layer     动画层
-     * @param animation 客户端骑乘动画数据传输对象
+     * @param animation 客户端骑乘动画数据
      */
     public void startRide(ResourceLocation layer, ClientRideAnimDTO animation) {
         startRide(layer, new AnimationRideEntity.RideAnimation(animation.id(), animation.animation()), player.position(), false);
     }
 
     /**
-     * 启动骑乘动画（使用资源位置）。
+     * 以资源位置启动骑乘，在玩家当前位置、非强制。
      *
      * @param layer   动画层
      * @param animLoc 动画资源位置
@@ -63,7 +82,7 @@ public class AnimationRideHelper {
     }
 
     /**
-     * 启动骑乘动画（指定位置）。
+     * 以资源位置启动骑乘，在指定位置、非强制。
      *
      * @param layer   动画层
      * @param animLoc 动画资源位置
@@ -74,26 +93,18 @@ public class AnimationRideHelper {
     }
 
     /**
-     * 启动骑乘动画（指定位置和强制标志）。
+     * 以资源位置启动骑乘，在指定位置、可强制。
      *
      * @param layer   动画层
      * @param animLoc 动画资源位置
      * @param pos     骑乘位置
-     * @param force   是否强制启动
+     * @param force   是否强制覆盖已有骑乘
      */
     public void startRide(ResourceLocation layer, ResourceLocation animLoc, Vec3 pos, boolean force) {
         ServerAnimation animation = ServerAnimationRegistry.getAnimations().get(animLoc);
         startRide(layer, new AnimationRideEntity.RideAnimation(animLoc, animation), pos, force);
     }
 
-    /**
-     * 启动骑乘动画（内部方法）。
-     *
-     * @param layer     动画层
-     * @param animation 骑乘动画
-     * @param pos       骑乘位置
-     * @param force     是否强制启动
-     */
     private void startRide(ResourceLocation layer, AnimationRideEntity.RideAnimation animation, Vec3 pos, boolean force) {
         PlayerAnimations oldData = PlayerAnimations.getData(player);
         ResourceLocation oldLayer = oldData.rideAnim().layer().orElse(null);
@@ -111,6 +122,8 @@ public class AnimationRideHelper {
     /**
      * 同步骑乘动画数据给指定目标玩家。
      *
+     * <p>向所有客户端广播同步包，使目标玩家的骑乘动画 tick 与本玩家对齐。</p>
+     *
      * @param target 目标玩家
      */
     public void syncRideAnim(ServerPlayer target) {
@@ -119,6 +132,8 @@ public class AnimationRideHelper {
 
     /**
      * 停止当前骑乘动画。
+     *
+     * <p>若玩家当前骑乘的是 {@link AnimationRideEntity}，则令其停止骑乘。</p>
      */
     public void stopRide() {
         if (player.getVehicle() instanceof AnimationRideEntity) {

@@ -12,6 +12,16 @@ import java.util.Optional;
 import java.util.TreeMap;
 import java.util.function.Function;
 
+/**
+ * 客户端动画数据，在 {@link Animation} 基础上增加相机变换（第一人称/第三人称）。
+ *
+ * <p>包含 {@link CameraChange} 内部记录，定义了按 tick 插值的相机偏移与欧拉角关键帧序列，
+ * 用于 {@code CameraTransformStateHandler} 在渲染时驱动相机变换。</p>
+ *
+ * @see Animation
+ * @see ServerAnimation
+ * @see CameraChange
+ */
 public class ClientAnimation extends Animation {
     private final CameraChange firstPersonCameraChange;
     private final CameraChange cameraChange;
@@ -60,6 +70,9 @@ public class ClientAnimation extends Animation {
         return cameraChange;
     }
 
+    /**
+     * 相机变换关键帧序列，按 tick 存储相机偏移与欧拉角，支持线性插值采样。
+     */
     public record CameraChange(boolean relative, TreeMap<Integer, CameraData> movement) {
         public CameraChange(boolean relative) {
             this(relative, new TreeMap<>());
@@ -73,8 +86,10 @@ public class ClientAnimation extends Animation {
         ).apply(i, CameraChange::new));
 
         /**
-         * 在 movement 关键帧之间按 tick 线性插值，得到该时刻的相机变换。
-         * tick 通常为 currentTick + partialTick。movement 为空时返回 null。
+         * 在 movement 关键帧之间按 tick 线性插值，得到该时刻的相机变换数据。
+         *
+         * @param tick 采样时刻（通常为 currentTick + partialTick）
+         * @return 插值后的相机数据；movement 为空时返回 {@code null}
          */
         public CameraData sample(float tick) {
             if (movement.isEmpty()) return null;
@@ -101,6 +116,8 @@ public class ClientAnimation extends Animation {
             return new CameraData(offset, euler);
         }
     }
+
+    /** 单帧相机数据，包含位置偏移与欧拉角。 */
     public record CameraData(Vec3 offset, EulerAngle camEulerAngles) {
         public static final Codec<CameraData> CODEC = RecordCodecBuilder.create(i -> i.group(
                 Vec3.CODEC.fieldOf("offset").forGetter(CameraData::offset),

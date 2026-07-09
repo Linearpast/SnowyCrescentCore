@@ -14,6 +14,13 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * 双向：同步动画驱动的移动 tick 数据，用于 AABB 移动计算。
+ *
+ * @param playerUUID  玩家 UUID
+ * @param animationId 当前动画 ID，为空表示动画已结束
+ * @param currentTick 当前 tick
+ */
 public record MovementAnimationTickData(UUID playerUUID, Optional<ResourceLocation> animationId, int currentTick) implements CustomPacketPayload {
     public static final Type<@NotNull MovementAnimationTickData> TYPE = new Type<>(SCCore.id("movement_animation_tick"));
 

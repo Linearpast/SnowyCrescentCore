@@ -11,6 +11,12 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
+/**
+ * 服务端 → 客户端：同步两个玩家的骑乘动画 tick，使二者保持同步播放。
+ *
+ * @param player 源玩家 UUID
+ * @param target 目标玩家 UUID
+ */
 public record SyncAnimationData(UUID player, UUID target) implements CustomPacketPayload {
     public static final CustomPacketPayload.Type<@NotNull SyncAnimationData> TYPE =
             new CustomPacketPayload.Type<>(SCCore.id("sync_animation_data"));

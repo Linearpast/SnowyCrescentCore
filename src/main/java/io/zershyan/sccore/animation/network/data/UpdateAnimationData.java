@@ -14,6 +14,12 @@ import org.jetbrains.annotations.NotNull;
 import java.util.HashMap;
 import java.util.function.Function;
 
+/**
+ * 客户端 → 服务端：更新玩家的客户端/服务端动画映射。
+ *
+ * @param animations 层 → 动画的映射
+ * @param isServer   是否为服务端动画映射（{@code false} 为客户端映射）
+ */
 public record UpdateAnimationData(HashMap<ResourceLocation, ResourceLocation> animations, boolean isServer) implements CustomPacketPayload {
     public static final Type<@NotNull UpdateAnimationData> TYPE =
             new Type<>(SCCore.id("animator_animation"));

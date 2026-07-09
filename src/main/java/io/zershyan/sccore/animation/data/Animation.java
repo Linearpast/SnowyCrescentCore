@@ -6,6 +6,15 @@ import net.minecraft.world.phys.AABB;
 import java.util.Optional;
 import java.util.TreeMap;
 
+/**
+ * 动画数据的抽象基类，定义动画的通用属性。
+ *
+ * <p>由 {@link ClientAnimation}（客户端动画）和 {@link ServerAnimation}（服务端动画）继承，
+ * 分别添加各自特有的属性。</p>
+ *
+ * @see ClientAnimation
+ * @see ServerAnimation
+ */
 public abstract class Animation {
     protected final ResourceLocation animationLocation;
     protected final Optional<String> name;

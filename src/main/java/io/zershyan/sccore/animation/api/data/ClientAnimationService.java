@@ -19,39 +19,39 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * 客户端动画服务实现类。
- * <p>
- * 负责在客户端管理玩家的动画数据，通过网络包将数据同步到服务端。
+ * 客户端动画服务实现。
+ *
+ * <p>客户端不直接持久化动画数据，而是通过发包将修改同步到服务端：{@code setData} 会分别发送
+ * 骑乘动画包（{@link UpdateRideAnimationData}）与客户端/服务端动画映射包
+ * （{@link UpdateAnimationData}），由服务端回写并经 Attachment 同步回所有客户端。</p>
+ *
+ * @see IAnimationService
+ * @see AnimationService
  */
 @OnlyIn(Dist.CLIENT)
 public class ClientAnimationService implements IAnimationService {
     private final AbstractClientPlayer player;
 
     /**
-     * 构造函数。
+     * 构造客户端动画服务。
      *
-     * @param player 客户端玩家实例
+     * @param player 绑定的客户端玩家（会被强转为 {@link AbstractClientPlayer}）
      */
     protected ClientAnimationService(Player player) {
         this.player = (AbstractClientPlayer) player;
     }
 
-    /**
-     * 获取玩家的动画数据。
-     *
-     * @return 玩家动画数据对象
-     */
+    /** 从客户端缓存的玩家动画数据读取（由 Attachment 同步而来）。 */
     @Override
     public PlayerAnimations getData() {
         return PlayerAnimations.getData(player);
     }
 
     /**
-     * 设置玩家的动画数据并同步到服务端。
-     * <p>
-     * 通过发送网络包将客户端和服务端的动画数据分别同步。
+     * 将动画数据通过发包同步到服务端。
      *
-     * @param data 玩家动画数据对象
+     * <p>对骑乘动画会根据来源选择 {@code ResourceLocation} 或 {@link ClientRideAnimDTO}（携带完整
+     * 客户端动画定义）；对客户端/服务端动画映射分别发送两个 {@link UpdateAnimationData} 包。</p>
      */
     @Override
     public void setData(PlayerAnimations data) {
@@ -69,6 +69,11 @@ public class ClientAnimationService implements IAnimationService {
         PacketDistributor.sendToServer(new UpdateAnimationData(data.serverAnimMap(), true));
     }
 
+    /**
+     * 取最高优先级动画：优先从客户端动画映射取最大值，否则回退到服务端动画映射与骑乘动画合并取最大值。
+     *
+     * @return 最高优先级动画条目；无则 {@link Optional#empty()}
+     */
     @Override
     public Optional<Map.Entry<ResourceLocation, ResourceLocation>> getHighestPriorityAnimation() {
         PlayerAnimations data = getData();

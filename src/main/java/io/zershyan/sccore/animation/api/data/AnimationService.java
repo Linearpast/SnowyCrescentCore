@@ -12,42 +12,44 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
- * 服务端动画服务实现类。
- * <p>
- * 负责在服务端管理玩家的动画数据，通过 Attachment 机制存储和读取动画数据。
+ * 服务端动画服务实现。
+ *
+ * <p>玩家动画数据通过 NeoForge 的 Attachment 机制存储于服务端玩家身上（见
+ * {@link AnimationAttachments#PLAYER_ANIMATIONS}），{@code setData} 会直接写回该 Attachment，
+ * 依赖框架的同步逻辑将变更同步到客户端。</p>
+ *
+ * @see IAnimationService
+ * @see ClientAnimationService
  */
 public class AnimationService implements IAnimationService {
     private final ServerPlayer player;
 
     /**
-     * 构造函数。
+     * 构造服务端动画服务。
      *
-     * @param player 服务端玩家实例
+     * @param player 绑定的服务端玩家
      */
     protected AnimationService(ServerPlayer player) {
         this.player = player;
     }
 
-    /**
-     * 获取玩家的动画数据。
-     *
-     * @return 玩家动画数据对象
-     */
+    /** 从 Attachment 读取玩家动画数据。 */
     @Override
     public PlayerAnimations getData() {
         return PlayerAnimations.getData(player);
     }
 
-    /**
-     * 设置玩家的动画数据。
-     *
-     * @param data 玩家动画数据对象
-     */
+    /** 将动画数据写回玩家的 Attachment，由框架自动同步。 */
     @Override
     public void setData(PlayerAnimations data) {
         player.setData(type(), data);
     }
 
+    /**
+     * 取最高优先级动画：服务端动画映射与骑乘动画（若有层）合并后取最大值。
+     *
+     * @return 最高优先级动画条目；无则 {@link Optional#empty()}
+     */
     @Override
     public Optional<Map.Entry<ResourceLocation, ResourceLocation>> getHighestPriorityAnimation() {
         PlayerAnimations data = getData();
@@ -56,11 +58,6 @@ public class AnimationService implements IAnimationService {
         return serverAnimMap.entrySet().stream().max(AnimationHelper.COMPARATOR);
     }
 
-    /**
-     * 获取动画数据的 Attachment 类型。
-     *
-     * @return Attachment 类型的供应商
-     */
     private static Supplier<AttachmentType<PlayerAnimations>> type() {
         return AnimationAttachments.PLAYER_ANIMATIONS;
     }

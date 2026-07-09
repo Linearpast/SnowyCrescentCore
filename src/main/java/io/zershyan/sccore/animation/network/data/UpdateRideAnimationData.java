@@ -14,6 +14,15 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
+/**
+ * 客户端 → 服务端：更新玩家的骑乘动画。
+ *
+ * <p>动画来源使用 {@link Either} 表示：左侧为服务端已知的资源位置，
+ * 右侧为客户端独有的完整动画定义（{@link ClientRideAnimDTO}）。</p>
+ *
+ * @param layerLoc  骑乘动画层，为空表示清除骑乘
+ * @param animation 骑乘动画来源，为空表示清除骑乘
+ */
 public record UpdateRideAnimationData(Optional<ResourceLocation> layerLoc, Optional<Either<ResourceLocation, ClientRideAnimDTO>> animation) implements CustomPacketPayload {
     public static final Type<@NotNull UpdateRideAnimationData> TYPE =
             new Type<>(SCCore.id("animator_ride_animation"));

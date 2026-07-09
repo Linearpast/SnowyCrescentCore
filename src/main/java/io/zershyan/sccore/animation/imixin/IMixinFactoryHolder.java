@@ -8,9 +8,14 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
 
+/**
+ * Mixin 接口，用于访问 {@code PlayerAnimationFactory.FactoryHolder} 的内部数据，
+ * 支持按 ID 清除已注册的动画工厂。
+ */
 public interface IMixinFactoryHolder {
     record DataHolder(@Nullable ResourceLocation id, int priority, @NotNull IAnimation animation) {}
 
+    /** 清除指定 ID 集合对应的已注册动画工厂。 */
     void sccore$clearAnimations(Set<ResourceLocation> ids);
 
     static IMixinFactoryHolder of(PlayerAnimationFactory.FactoryHolder factoryHolder) {

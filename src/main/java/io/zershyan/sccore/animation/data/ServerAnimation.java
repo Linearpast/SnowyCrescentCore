@@ -12,6 +12,12 @@ import java.util.Optional;
 import java.util.TreeMap;
 import java.util.function.Function;
 
+/**
+ * 服务端动画数据，在 {@link Animation} 基础上增加 AABB 移动时间线与跳跃力度修正。
+ *
+ * @see Animation
+ * @see ClientAnimation
+ */
 public class ServerAnimation extends Animation {
     private final float jumpModifier;
     public static final Codec<ServerAnimation> CODEC = RecordCodecBuilder.create(i -> i.group(

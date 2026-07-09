@@ -14,6 +14,11 @@ import org.jetbrains.annotations.NotNull;
 import java.util.HashMap;
 import java.util.function.Function;
 
+/**
+ * 服务端 → 客户端：同步服务端动画注册表到客户端。
+ *
+ * @param animations 动画 ID → 服务端动画定义的映射
+ */
 public record RegisterAnimationData(HashMap<ResourceLocation, ServerAnimation> animations) implements CustomPacketPayload {
     public static final Type<@NotNull RegisterAnimationData> TYPE =
             new Type<>(SCCore.id("animator_animations"));

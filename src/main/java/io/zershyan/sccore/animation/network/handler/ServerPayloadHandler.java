@@ -13,6 +13,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.Optional;
 
+/** 服务端网络包处理器。 */
 public class ServerPayloadHandler {
     public static void updateAnimMap(UpdateAnimationData data, IPayloadContext context) {
         context.enqueueWork(() -> {

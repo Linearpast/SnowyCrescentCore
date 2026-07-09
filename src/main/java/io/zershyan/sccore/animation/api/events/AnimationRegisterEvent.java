@@ -10,23 +10,41 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 动画注册事件的抽象基类。
- * <p>
- * 用于在服务端和客户端注册动画数据，允许模组在初始化阶段注册自定义动画。
+ * 动画注册事件，在动画注册表重载时由 NeoForge 事件总线分发。
+ *
+ * <p>模组监听 {@link Client} 或 {@link Server} 子类事件，通过
+ * {@link Client#createAnimation} / {@link Server#createAnimation} 以链式调用注册自定义动画。
+ * 事件在资源包驱动的注册之前触发，因此代码注册的动画可被资源包覆盖。</p>
+ *
+ * <h3>典型用法</h3>
+ * <pre>{@code
+ * @SubscribeEvent
+ * public static void onRegister(AnimationRegisterEvent.Server event) {
+ *     event.createAnimation(SCCore.id("my_anim"), SCCore.id("my_keyframe"))
+ *           .priority(10)
+ *           .defaultThirdPerson(true);
+ * }
+ * }</pre>
+ *
+ * @see LayerRegisterEvent
+ * @see AnimationBuilder
  */
 public abstract class AnimationRegisterEvent extends Event {
     /**
      * 客户端动画注册事件。
-     * <p>
-     * 在客户端初始化时触发，用于注册客户端专属的动画。
+     *
+     * <p>在客户端资源重载或玩家登录时触发。注册的动画会被转换为 {@link ClientAnimation}
+     * 并存入 {@link io.zershyan.sccore.animation.core.SyncAnimationFactory}。</p>
      */
     public static class Client extends AnimationRegisterEvent {
         private final Map<ResourceLocation, AnimationBuilder.Client> animations = new HashMap<>();
 
         /**
-         * 获取已注册的客户端动画映射。
+         * 构建并返回所有已注册的客户端动画。
          *
-         * @return 动画资源位置到客户端动画对象的映射
+         * <p>每个 {@link AnimationBuilder.Client} 会在调用时执行 {@link AnimationBuilder.Client#build()}。</p>
+         *
+         * @return 动画 ID 到 {@link ClientAnimation} 的映射
          */
         public Map<ResourceLocation, ClientAnimation> getAnimations() {
             Map<ResourceLocation, ClientAnimation> animationMap = new HashMap<>();
@@ -37,10 +55,11 @@ public abstract class AnimationRegisterEvent extends Event {
         }
 
         /**
-         * 注册客户端动画。
+         * 创建并注册一个客户端动画，返回构建器以继续链式配置。
          *
-         * @param location 动画的资源标识符
-         * @param animationLocation 动画资源位置
+         * @param location          动画的逻辑 ID（用于引用该动画）
+         * @param animationLocation 关联的关键帧动画资源位置
+         * @return 客户端动画构建器
          */
         public AnimationBuilder.Client createAnimation(ResourceLocation location, ResourceLocation animationLocation) {
             AnimationBuilder.Client builder = AnimationBuilder.Client.builder(animationLocation);
@@ -51,16 +70,17 @@ public abstract class AnimationRegisterEvent extends Event {
 
     /**
      * 服务端动画注册事件。
-     * <p>
-     * 在服务端初始化时触发，用于注册服务端专属的动画。
+     *
+     * <p>在服务端启动或资源重载时触发。注册的动画会被存入
+     * {@link io.zershyan.sccore.animation.core.ServerAnimationRegistry} 并在玩家登录时同步到客户端。</p>
      */
     public static class Server extends AnimationRegisterEvent {
         private final Map<ResourceLocation, AnimationBuilder.Server> animations = new HashMap<>();
 
         /**
-         * 获取已注册的服务端动画映射。
+         * 构建并返回所有已注册的服务端动画。
          *
-         * @return 动画资源位置到服务端动画对象的映射
+         * @return 动画 ID 到 {@link ServerAnimation} 的映射
          */
         public Map<ResourceLocation, ServerAnimation> getAnimations() {
             Map<ResourceLocation, ServerAnimation> animationMap = new HashMap<>();
@@ -71,10 +91,11 @@ public abstract class AnimationRegisterEvent extends Event {
         }
 
         /**
-         * 注册服务端动画。
+         * 创建并注册一个服务端动画，返回构建器以继续链式配置。
          *
-         * @param location 动画的资源标识符
-         * @param animationLocation 动画资源位置
+         * @param location          动画的逻辑 ID（用于引用该动画）
+         * @param animationLocation 关联的关键帧动画资源位置
+         * @return 服务端动画构建器
          */
         public AnimationBuilder.Server createAnimation(ResourceLocation location, ResourceLocation animationLocation) {
             AnimationBuilder.Server builder = AnimationBuilder.Server.builder(animationLocation);

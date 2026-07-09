@@ -7,6 +7,7 @@ import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
+/** 通用（双端）网络包处理器。 */
 public class CommonPayloadHandler {
     public static void movementAnimationTick(MovementAnimationTickData data, IPayloadContext context) {
         context.enqueueWork(() -> {

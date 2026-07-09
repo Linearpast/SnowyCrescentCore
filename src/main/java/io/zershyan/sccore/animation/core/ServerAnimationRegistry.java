@@ -35,6 +35,18 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.Function;
 
+/**
+ * 服务端动画注册表，管理服务端动画层与动画定义的注册、加载与同步。
+ *
+ * <p>注册来源有两种：</p>
+ * <ol>
+ *   <li>事件驱动 — 通过 {@link LayerRegisterEvent.Server} 和 {@link AnimationRegisterEvent.Server}</li>
+ *   <li>资源包驱动 — 从 {@code animation/layer/} 和 {@code animation/animation/} 目录下的 JSON 文件加载</li>
+ * </ol>
+ *
+ * <p>事件注册先于资源包注册执行，因此资源包可覆盖代码注册的内容。
+ * 玩家登录时自动将注册数据同步到客户端。</p>
+ */
 public class ServerAnimationRegistry {
     private static final Map<ResourceLocation, Integer> Layers = new HashMap<>();
     private static final Map<ResourceLocation, ServerAnimation> Animations = new HashMap<>();
@@ -117,6 +129,12 @@ public class ServerAnimationRegistry {
         PacketDistributor.sendToPlayer(player, new RegisterAnimationData(new HashMap<>(Animations)));
     }
 
+    /**
+     * 统一查询动画：先查服务端注册表，再查同步动画工厂。
+     *
+     * @param animationLocation 动画资源位置
+     * @return 动画实例，不存在则返回 {@code null}
+     */
     @Nullable
     public static Animation commonGetAnimation(ResourceLocation animationLocation) {
         if(Animations.containsKey(animationLocation)) return Animations.get(animationLocation);

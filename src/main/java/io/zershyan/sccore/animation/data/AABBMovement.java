@@ -3,6 +3,13 @@ package io.zershyan.sccore.animation.data;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
+/**
+ * AABB 移动控制器，管理动画驱动的碰撞箱移动的 tick 生命周期。
+ *
+ * <p>定义了四个关键 tick 节点：开始、结束、停止和回退。
+ * 超过 {@code endTick} 后自动回退到 {@code returnTick} 循环播放，
+ * 达到 {@code stopTick} 后标记为已停止。</p>
+ */
 public class AABBMovement {
     public static final Codec<AABBMovement> CODEC = RecordCodecBuilder.create(i -> i.group(
             Codec.INT.fieldOf("beginTick").forGetter(AABBMovement::getBeginTick),
@@ -24,6 +31,7 @@ public class AABBMovement {
         this.returnTick = returnTick;
     }
 
+    /** 推进一 tick，超过 endTick 后回退到 returnTick，达到 stopTick 后标记停止。 */
     public void tick() {
         this.currentTick++;
         if (this.currentTick > this.endTick) {

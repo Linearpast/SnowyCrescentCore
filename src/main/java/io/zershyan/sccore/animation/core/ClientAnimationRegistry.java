@@ -41,6 +41,13 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
 
+/**
+ * 客户端动画注册表，管理客户端动画层与动画定义的注册、加载与 Player Animator 层绑定。
+ *
+ * <p>注册来源与服务端相同（事件驱动 + 资源包驱动），此外还负责将注册的层
+ * 深度绑定到 Player Animator 的 {@code AnimationStack} 中，并在资源重载时
+ * 通过反射重建已有玩家的动画栈。</p>
+ */
 public class ClientAnimationRegistry {
     private static final Map<ResourceLocation, Integer> Layers = new HashMap<>();
     private static final Map<ResourceLocation, ClientAnimation> Animations = new HashMap<>();
@@ -108,8 +115,9 @@ public class ClientAnimationRegistry {
     }
 
     /**
-     * 深度注册Layer，将Layer映射到player animator的底层数据中
-     * @param layers 需要注册的Layer层
+     * 深度注册 Layer，将 Layer 映射到 Player Animator 的底层数据中。
+     *
+     * @param layers 需要注册的 Layer 层
      */
     public static void registerLayers(Map<ResourceLocation, Integer> layers) {
         IMixinFactoryHolder.of(PlayerAnimationFactory.ANIMATION_DATA_FACTORY).sccore$clearAnimations(layers.keySet());
@@ -145,10 +153,12 @@ public class ClientAnimationRegistry {
         return Map.copyOf(Animations);
     }
 
+    /** 获取所有客户端动画，包括本地注册的与服务端同步的。 */
     public static Map<ResourceLocation, ClientAnimation> getAllAnimations() {
         return Map.copyOf(new HashMap<>(Animations){{putAll(SyncAnimationFactory.getAnimations());}});
     }
 
+    /** 获取所有客户端层，包括本地注册的与服务端同步的。 */
     public static Map<ResourceLocation, Integer> getAllLayers() {
         return Map.copyOf(new HashMap<>(Layers){{putAll(SyncAnimationFactory.getLayers());}});
     }
@@ -158,6 +168,12 @@ public class ClientAnimationRegistry {
                 .map(KeyframeAnimationPlayer::getData).orElse(null);
     }
 
+    /**
+     * 查询客户端动画，优先查同步动画工厂，再查本地注册表。
+     *
+     * @param location 动画资源位置
+     * @return 动画实例，不存在则返回 {@code null}
+     */
     @Nullable
     public static ClientAnimation getAnimation(ResourceLocation location) {
         ClientAnimation anim = SyncAnimationFactory.getAnimation(location);
@@ -165,6 +181,12 @@ public class ClientAnimationRegistry {
         return anim;
     }
 
+    /**
+     * 获取指定动画对应的 Player Animator 关键帧动画。
+     *
+     * @param location 动画资源位置
+     * @return 关键帧动画，不存在则返回 {@code null}
+     */
     @Nullable
     public static KeyframeAnimation getKeyframeAnimation(ResourceLocation location) {
         ClientAnimation animation = getAnimation(location);
@@ -183,8 +205,11 @@ public class ClientAnimationRegistry {
     }
 
     /**
-     * 反射修改玩家Layer底层数据 <br>
-     * Mixin办不到或过于麻烦
+     * 反射修改玩家 Layer 底层数据。
+     *
+     * <p>由于 Mixin 无法或过于麻烦实现，此处通过反射重建玩家的 {@link AnimationStack}，
+     * 合并旧栈中仍在播放的层与新注册的层，并重新播放当前活跃的动画。</p>
+     *
      * @param player 目标玩家
      */
     @SuppressWarnings({"JavaReflectionMemberAccess", "UnstableApiUsage", "unchecked"})

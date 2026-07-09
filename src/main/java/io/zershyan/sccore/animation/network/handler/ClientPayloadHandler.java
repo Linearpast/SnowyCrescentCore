@@ -19,6 +19,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 import java.util.HashMap;
 import java.util.Map;
 
+/** 客户端网络包处理器。 */
 public class ClientPayloadHandler {
     public static void registerLayers(RegisterLayerData data, IPayloadContext context) {
         context.enqueueWork(() -> SyncAnimationFactory.reloadLayers(data.layers()));
