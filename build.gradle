@@ -114,7 +114,7 @@ configurations {
     runtimeClasspath.extendsFrom localRuntime
 }
 
-jarJar.setEnabled(true)
+//jarJar.setEnabled(true)
 
 dependencies {
     //Patchouli
@@ -131,10 +131,6 @@ dependencies {
         runtimeOnly "curse.maven:freecam-by-zergatul-618947:5591136"
         runtimeOnly "curse.maven:jade-324717:7545219"
     }
-
-    // Mixin^2
-    compileOnly(annotationProcessor("com.github.bawnorton.mixinsquared:mixinsquared-common:0.3.7-beta.1"))
-    implementation(jarJar("com.github.bawnorton.mixinsquared:mixinsquared-neoforge:0.3.7-beta.1"))
 }
 
 var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {
@@ -173,6 +169,7 @@ publishing {
     publications {
         register('mavenJava', MavenPublication) {
             from components.java
+            artifactId = mod_id
             pom {
                 name = mod_id
                 description = mod_description
