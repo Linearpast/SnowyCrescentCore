@@ -1,5 +1,6 @@
 package io.zershyan.sccore.animation.api.server;
 
+import io.zershyan.sccore.animation.api.SCCAnimationApi;
 import io.zershyan.sccore.animation.core.ServerAnimationRegistry;
 import io.zershyan.sccore.animation.data.ClientRideAnimDTO;
 import io.zershyan.sccore.animation.data.ServerAnimation;
