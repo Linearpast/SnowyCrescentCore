@@ -26,7 +26,9 @@ public class AnimationPlayerHandler {
             Minecraft instance = Minecraft.getInstance();
             AbstractClientPlayer player = instance.player;
             if(player == null) return;
-            Optional<Map.Entry<ResourceLocation, ResourceLocation>> max = SCCAnimationApi.animation(player).getHighestPriorityAnimation();
+            Optional<Map.Entry<ResourceLocation, ResourceLocation>> max = SCCAnimationApi.animation(player).getHighestPriorityAnimation(
+                    animation -> !animation.aabbMovement().isEmpty()
+            );
             if(max.isEmpty()) return;
             Map.Entry<ResourceLocation, ResourceLocation> entry = max.get();
             currentAnimation = SCCAnimationApi.animPlayer(player).getKeyframeAnimationPlayer(entry.getKey());

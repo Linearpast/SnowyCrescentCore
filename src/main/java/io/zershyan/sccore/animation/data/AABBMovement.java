@@ -2,67 +2,60 @@ package io.zershyan.sccore.animation.data;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 
-/**
- * AABB 移动控制器，管理动画驱动的碰撞箱移动的 tick 生命周期。
- *
- * <p>定义了四个关键 tick 节点：开始、结束、停止和回退。
- * 超过 {@code endTick} 后自动回退到 {@code returnTick} 循环播放，
- * 达到 {@code stopTick} 后标记为已停止。</p>
- */
+import java.util.List;
+import java.util.TreeMap;
+import java.util.function.Function;
+
 public class AABBMovement {
     public static final Codec<AABBMovement> CODEC = RecordCodecBuilder.create(i -> i.group(
-            Codec.INT.fieldOf("beginTick").forGetter(AABBMovement::getBeginTick),
-            Codec.INT.fieldOf("endTick").forGetter(AABBMovement::getEndTick),
-            Codec.INT.fieldOf("stopTick").forGetter(AABBMovement::getStopTick),
-            Codec.INT.fieldOf("returnTick").forGetter(AABBMovement::getReturnTick)
-    ).apply(i, AABBMovement::new));
-    private final int beginTick;
-    private final int endTick;
-    private final int stopTick;
-    private final int returnTick;
-    private boolean stopped = false;
-    private int currentTick = 0;
+            Codec.BOOL.optionalFieldOf("relative", true).forGetter(AABBMovement::isRelative),
+            Codec.unboundedMap(Codec.STRING.xmap(Integer::parseInt, Object::toString), Vec3.CODEC.listOf(2, 2).xmap(
+                    vec3s -> new AABB(vec3s.getFirst(), vec3s.getLast()),
+                    ab -> List.of(new Vec3(ab.minX, ab.minY, ab.minZ), new Vec3(ab.maxX, ab.maxY, ab.maxZ))
+            )).xmap(TreeMap::new, Function.identity()).fieldOf("aabbMovement").forGetter(AABBMovement::getMovementTree)
+    ).apply(i, AABBMovement::of));
+    private final TreeMap<Integer, AABB> movementTree = new TreeMap<>();
+    private boolean relative = true;
 
-    public AABBMovement(int beginTick, int endTick, int stopTick, int returnTick) {
-        this.beginTick = beginTick;
-        this.endTick = endTick;
-        this.stopTick = stopTick;
-        this.returnTick = returnTick;
+    public AABBMovement() {}
+
+    public AABBMovement(boolean relative) {
+        this.relative = relative;
     }
 
-    /** 推进一 tick，超过 endTick 后回退到 returnTick，达到 stopTick 后标记停止。 */
-    public void tick() {
-        this.currentTick++;
-        if (this.currentTick > this.endTick) {
-            this.currentTick = this.returnTick;
-        }
-        if (this.currentTick >= this.stopTick) {
-            stopped = true;
-        }
+    public static AABBMovement of(boolean relative, TreeMap<Integer, AABB> aabbMovement) {
+        AABBMovement movement = new AABBMovement(relative);
+        movement.getMovementTree().putAll(aabbMovement);
+        return movement;
     }
 
-    public int getBeginTick() {
-        return beginTick;
+    public boolean isRelative() {
+        return relative;
     }
 
-    public int getEndTick() {
-        return endTick;
+    public AABBMovement relative(boolean relative) {
+        this.relative = relative;
+        return this;
     }
 
-    public int getStopTick() {
-        return stopTick;
+    public TreeMap<Integer, AABB> getMovementTree() {
+        return movementTree;
     }
 
-    public int getReturnTick() {
-        return returnTick;
+    public AABBMovement add(int tick, AABB aabb) {
+        movementTree.put(tick, aabb);
+        return this;
     }
 
-    public int getCurrentTick() {
-        return currentTick;
+    public AABBMovement remove(int tick) {
+        movementTree.remove(tick);
+        return this;
     }
 
-    public boolean isStopped() {
-        return stopped;
+    public boolean isEmpty() {
+        return movementTree.isEmpty();
     }
 }

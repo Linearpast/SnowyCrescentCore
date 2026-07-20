@@ -1,9 +1,6 @@
 package io.zershyan.sccore.animation.api.utils;
 
-import io.zershyan.sccore.animation.data.Animation;
-import io.zershyan.sccore.animation.data.ClientAnimation;
-import io.zershyan.sccore.animation.data.RideData;
-import io.zershyan.sccore.animation.data.ServerAnimation;
+import io.zershyan.sccore.animation.data.*;
 import io.zershyan.sccore.animation.data.camera.CameraChange;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.AABB;
@@ -42,7 +39,7 @@ public abstract class AnimationBuilder<T extends AnimationBuilder<?>> {
     @Nullable
     protected RideData rideData = null;
     protected boolean defaultThirdPerson = false;
-    protected final TreeMap<Integer, AABB> aabbMovement = new TreeMap<>();
+    protected final AABBMovement aabbMovement = new AABBMovement();
 
     /**
      * @param animationLocation 关联的关键帧动画资源位置
@@ -86,14 +83,20 @@ public abstract class AnimationBuilder<T extends AnimationBuilder<?>> {
 
     /** 替换整个 AABB 移动时间线。 */
     public T aabbMovement(TreeMap<Integer, AABB> aabbMovement) {
-        this.aabbMovement.clear();
-        this.aabbMovement.putAll(aabbMovement);
+        this.aabbMovement.getMovementTree().clear();
+        this.aabbMovement.getMovementTree().putAll(aabbMovement);
         return builder;
     }
 
     /** 在指定 tick 处添加一个 AABB 关键帧。 */
     public T addAABBMovement(int tick, AABB aabb) {
-        this.aabbMovement.put(tick, aabb);
+        this.aabbMovement.add(tick, aabb);
+        return builder;
+    }
+
+    /** 设置移动时间线是否动态 */
+    public T addAABBMovementRelative(boolean relative) {
+        this.aabbMovement.relative(relative);
         return builder;
     }
 

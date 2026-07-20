@@ -28,7 +28,11 @@ public abstract class MixinLivingEntity {
     public float modifyJumpPower(LivingEntity instance, Operation<Float> original) {
         modifyJumpPower: {
             if(!(instance instanceof Player player)) break modifyJumpPower;
-            Optional<Map.Entry<ResourceLocation, ResourceLocation>> max = SCCAnimationApi.animation(player).getHighestPriorityAnimation();
+            Optional<Map.Entry<ResourceLocation, ResourceLocation>> max = SCCAnimationApi.animation(player).getHighestPriorityAnimation(animation -> {
+                if(animation instanceof ServerAnimation serverAnimation) {
+                    return serverAnimation.jumpModifier() != 1.0f;
+                }else return false;
+            });
             if(max.isEmpty()) break modifyJumpPower;
             ResourceLocation value = max.get().getValue();
             Animation animation = ServerAnimationRegistry.commonGetAnimation(value);

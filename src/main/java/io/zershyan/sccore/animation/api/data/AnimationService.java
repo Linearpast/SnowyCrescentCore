@@ -1,14 +1,15 @@
 package io.zershyan.sccore.animation.api.data;
 
+import io.zershyan.sccore.animation.data.Animation;
 import io.zershyan.sccore.animation.registry.AnimationAttachments;
 import io.zershyan.sccore.animation.registry.attachment.PlayerAnimations;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.attachment.AttachmentType;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 /**
@@ -51,11 +52,8 @@ public class AnimationService implements IAnimationService {
      * @return 最高优先级动画条目；无则 {@link Optional#empty()}
      */
     @Override
-    public Optional<Map.Entry<ResourceLocation, ResourceLocation>> getHighestPriorityAnimation() {
-        PlayerAnimations data = getData();
-        HashMap<ResourceLocation, ResourceLocation> serverAnimMap = new HashMap<>(data.serverAnimMap());
-        data.rideAnim().layer().ifPresent(layer -> serverAnimMap.put(layer, data.rideAnim().animation().orElseThrow()));
-        return serverAnimMap.entrySet().stream().max(AnimationHelper.COMPARATOR);
+    public Optional<Map.Entry<ResourceLocation, ResourceLocation>> getHighestPriorityAnimation(Predicate<Animation> predicate) {
+        return getServerHighestPriorityAnimation(predicate);
     }
 
     private static Supplier<AttachmentType<PlayerAnimations>> type() {

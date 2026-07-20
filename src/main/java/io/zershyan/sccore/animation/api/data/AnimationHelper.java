@@ -5,6 +5,7 @@ import io.zershyan.sccore.animation.api.SCCAnimationApi;
 import io.zershyan.sccore.animation.core.ClientAnimationRegistry;
 import io.zershyan.sccore.animation.core.ServerAnimationRegistry;
 import io.zershyan.sccore.animation.core.SyncAnimationFactory;
+import io.zershyan.sccore.animation.data.Animation;
 import io.zershyan.sccore.animation.data.ClientAnimation;
 import io.zershyan.sccore.animation.registry.attachment.PlayerAnimations;
 import net.minecraft.resources.ResourceLocation;
@@ -18,6 +19,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * 玩家动画数据操作助手，是动画 API 操作玩家动画数据的主要入口。
@@ -104,8 +106,8 @@ public class AnimationHelper {
      *
      * @return 最高优先级动画条目；无任何动画时为 {@link Optional#empty()}
      */
-    public Optional<Map.Entry<ResourceLocation, ResourceLocation>> getHighestPriorityAnimation() {
-        return service.getHighestPriorityAnimation();
+    public Optional<Map.Entry<ResourceLocation, ResourceLocation>> getHighestPriorityAnimation(Predicate<Animation> predicate) {
+        return service.getHighestPriorityAnimation(predicate);
     }
 
     /**

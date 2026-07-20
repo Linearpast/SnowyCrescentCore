@@ -35,15 +35,42 @@ public class MixinEntity {
         Animation animation = ServerAnimationRegistry.commonGetAnimation(resourceLocation.get());
         if(animation == null) return original;
         float partialTick = SCCoreApi.tryGetPartialTick(player.level());
-        AABB aabb = sccore$getInterpolatedAABB(data.currentTick(), partialTick, animation.aabbMovement());
+        AABB aabb = sccore$getInterpolatedAABB(data.currentTick(), partialTick, animation.aabbMovement().getMovementTree());
         if(aabb == null) return original;
-        return original
-                .setMinX(original.minX + aabb.minX)
-                .setMinY(original.minY + aabb.minY)
-                .setMinZ(original.minZ + aabb.minZ)
-                .setMaxX(original.maxX + aabb.maxX)
-                .setMaxY(original.maxY + aabb.maxY)
-                .setMaxZ(original.maxZ + aabb.maxZ);
+
+        double minXOffset = aabb.minX;
+        double minYOffset = aabb.minY;
+        double minZOffset = aabb.minZ;
+        double maxXOffset = aabb.maxX;
+        double maxYOffset = aabb.maxY;
+        double maxZOffset = aabb.maxZ;
+
+        if (animation.aabbMovement().isRelative()) {
+            float yaw = player.getPreciseBodyRotation(partialTick);
+            double rad = Math.toRadians(-yaw);
+            double sin = Math.sin(rad);
+            double cos = Math.cos(rad);
+
+            double newMinX = minXOffset * cos + minZOffset * sin;
+            double newMaxX = maxXOffset * cos + maxZOffset * sin;
+            double newMinZ = minZOffset * cos - minXOffset * sin;
+            double newMaxZ = maxZOffset * cos - maxXOffset * sin;
+
+
+            minXOffset = Math.min(newMinX, newMaxX);
+            minZOffset = Math.min(newMinZ, newMaxZ);
+            maxXOffset = Math.max(newMinX, newMaxX);
+            maxZOffset = Math.max(newMinZ, newMaxZ);
+        }
+
+        return new AABB(
+                original.maxX + maxXOffset,
+                original.maxY + maxYOffset,
+                original.maxZ + maxZOffset,
+                original.minX + minXOffset,
+                original.minY + minYOffset,
+                original.minZ + minZOffset
+        );
     }
 
     @Unique

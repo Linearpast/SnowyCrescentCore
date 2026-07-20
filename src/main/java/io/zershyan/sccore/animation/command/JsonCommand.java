@@ -10,6 +10,7 @@ import io.zershyan.sccore.SCCore;
 import io.zershyan.sccore.animation.core.ClientAnimationRegistry;
 import io.zershyan.sccore.animation.core.ServerAnimationRegistry;
 import io.zershyan.sccore.animation.core.SyncAnimationFactory;
+import io.zershyan.sccore.animation.data.AABBMovement;
 import io.zershyan.sccore.animation.data.ClientAnimation;
 import io.zershyan.sccore.animation.data.RideData;
 import io.zershyan.sccore.animation.data.ServerAnimation;
@@ -28,7 +29,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Optional;
+import java.util.TreeMap;
 
 import static net.minecraft.commands.Commands.literal;
 
@@ -75,7 +79,7 @@ public class JsonCommand {
             ServerAnimation serverAnimation = new ServerAnimation(
                     SCCore.id("animation_key"), Optional.of("测试动画"), 0,
                     Optional.of(new RideData(List.of(SCCore.id("sub_animation")), new Vec3(0, 0, 0), 100, 90, 0)), true,
-                     new TreeMap<>(Map.of(1, new AABB(Vec3.ZERO, Vec3.ZERO.add(2.0, 2.0, 2.0)))), 1.0f
+                    new AABBMovement(true).add(1, new AABB(Vec3.ZERO, Vec3.ZERO.add(2.0, 2.0, 2.0))), 1.0f
             );
             JsonElement exampleServerAnimationJson = ServerAnimationRegistry.SERVER_ANIMATION_CODEC.encodeStart(JsonOps.INSTANCE, serverAnimation).getOrThrow();
             Files.writeString(serverAnimExample, gson.toJson(exampleServerAnimationJson), StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);

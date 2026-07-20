@@ -58,4 +58,8 @@ public record CameraChange(TreeMap<Integer, CameraData> movement) {
         );
         return new CameraData(relativeOffset, offset, euler);
     }
+
+    public boolean isEmpty() {
+        return movement.isEmpty();
+    }
 }

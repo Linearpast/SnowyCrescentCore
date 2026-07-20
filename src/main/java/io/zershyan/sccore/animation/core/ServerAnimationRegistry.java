@@ -8,6 +8,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.zershyan.sccore.SCCore;
 import io.zershyan.sccore.animation.api.events.AnimationRegisterEvent;
 import io.zershyan.sccore.animation.api.events.LayerRegisterEvent;
+import io.zershyan.sccore.animation.data.AABBMovement;
 import io.zershyan.sccore.animation.data.Animation;
 import io.zershyan.sccore.animation.data.RideData;
 import io.zershyan.sccore.animation.data.ServerAnimation;
@@ -19,8 +20,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
@@ -30,10 +29,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.BufferedReader;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
-import java.util.function.Function;
 
 /**
  * 服务端动画注册表，管理服务端动画层与动画定义的注册、加载与同步。
@@ -59,12 +55,7 @@ public class ServerAnimationRegistry {
             Codec.INT.optionalFieldOf("priority", 0).forGetter(Animation::priority),
             RideData.CODEC.optionalFieldOf("rideData").forGetter(Animation::rideData),
             Codec.BOOL.optionalFieldOf("defaultThirdPerson", false).forGetter(Animation::defaultThirdPerson),
-            Codec.unboundedMap(Codec.STRING.xmap(Integer::parseInt, Object::toString), Vec3.CODEC.listOf(2, 2).xmap(
-                            vec3s -> new AABB(vec3s.getFirst(), vec3s.getLast()),
-                            ab -> List.of(new Vec3(ab.minX, ab.minY, ab.minZ), new Vec3(ab.maxX, ab.maxY, ab.maxZ))
-                    )).xmap(TreeMap::new, Function.identity())
-                    .optionalFieldOf("aabbMovement", new TreeMap<>())
-                    .forGetter(Animation::aabbMovement),
+            AABBMovement.CODEC.optionalFieldOf("aabbMovement", new AABBMovement()).forGetter(Animation::aabbMovement),
             Codec.FLOAT.optionalFieldOf("jumpModifier", 1.0f).forGetter(ServerAnimation::jumpModifier)
     ).apply(i, ServerAnimation::new));
 

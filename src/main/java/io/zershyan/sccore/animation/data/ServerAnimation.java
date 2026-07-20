@@ -3,14 +3,9 @@ package io.zershyan.sccore.animation.data;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.TreeMap;
-import java.util.function.Function;
 
 /**
  * 服务端动画数据，在 {@link Animation} 基础上增加 AABB 移动时间线与跳跃力度修正。
@@ -26,11 +21,7 @@ public class ServerAnimation extends Animation {
             Codec.INT.fieldOf("priority").forGetter(Animation::priority),
             RideData.CODEC.optionalFieldOf("rideData").forGetter(Animation::rideData),
             Codec.BOOL.fieldOf("defaultThirdPerson").forGetter(Animation::defaultThirdPerson),
-            Codec.unboundedMap(Codec.STRING.xmap(Integer::parseInt, Object::toString), Vec3.CODEC.listOf(2, 2).xmap(
-                            vec3s -> new AABB(vec3s.getFirst(), vec3s.getLast()),
-                            ab -> List.of(new Vec3(ab.minX, ab.minY, ab.minZ), new Vec3(ab.maxX, ab.maxY, ab.maxZ))
-                    )).xmap(TreeMap::new, Function.identity())
-                    .fieldOf("aabbMovement").forGetter(Animation::aabbMovement),
+            AABBMovement.CODEC.optionalFieldOf("aabbMovement", new AABBMovement()).forGetter(Animation::aabbMovement),
             Codec.FLOAT.fieldOf("jumpModifier").forGetter(ServerAnimation::jumpModifier)
     ).apply(i, ServerAnimation::new));
     public static final Codec<ServerAnimation> SUB_CODEC = RecordCodecBuilder.create(i -> i.group(
@@ -39,17 +30,13 @@ public class ServerAnimation extends Animation {
             Codec.INT.fieldOf("priority").forGetter(ServerAnimation::priority),
             RideData.CODEC.optionalFieldOf("rideData").forGetter(ServerAnimation::rideData),
             Codec.BOOL.fieldOf("defaultThirdPerson").forGetter(ServerAnimation::defaultThirdPerson),
-            Codec.unboundedMap(Codec.STRING.xmap(Integer::parseInt, Object::toString), Vec3.CODEC.listOf(2, 2).xmap(
-                            vec3s -> new AABB(vec3s.getFirst(), vec3s.getLast()),
-                            ab -> List.of(new Vec3(ab.minX, ab.minY, ab.minZ), new Vec3(ab.maxX, ab.maxY, ab.maxZ))
-                    )).xmap(TreeMap::new, Function.identity())
-                    .fieldOf("aabbMovement").forGetter(Animation::aabbMovement)
+            AABBMovement.CODEC.optionalFieldOf("aabbMovement", new AABBMovement()).forGetter(Animation::aabbMovement)
     ).apply(i, ServerAnimation::new));
-    public ServerAnimation(ResourceLocation animationLocation, Optional<String> name, int priority, Optional<RideData> data, boolean defaultThirdPerson, TreeMap<Integer, AABB> aabbMovement, float jumpModifier) {
+    public ServerAnimation(ResourceLocation animationLocation, Optional<String> name, int priority, Optional<RideData> data, boolean defaultThirdPerson, AABBMovement aabbMovement, float jumpModifier) {
         super(animationLocation, name, priority, data, defaultThirdPerson, aabbMovement);
         this.jumpModifier = jumpModifier;
     }
-    public ServerAnimation(ResourceLocation animationLocation, Optional<String> name, int priority, Optional<RideData> data, boolean defaultThirdPerson, TreeMap<Integer, AABB> aabbMovement) {
+    public ServerAnimation(ResourceLocation animationLocation, Optional<String> name, int priority, Optional<RideData> data, boolean defaultThirdPerson, AABBMovement aabbMovement) {
         this(animationLocation, name, priority, data, defaultThirdPerson, aabbMovement, 1.0f);
     }
 

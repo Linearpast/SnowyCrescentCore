@@ -3,6 +3,7 @@ package io.zershyan.sccore.animation.api.data;
 import com.mojang.datafixers.util.Either;
 import io.zershyan.sccore.animation.core.ClientAnimationRegistry;
 import io.zershyan.sccore.animation.core.SyncAnimationFactory;
+import io.zershyan.sccore.animation.data.Animation;
 import io.zershyan.sccore.animation.data.ClientRideAnimDTO;
 import io.zershyan.sccore.animation.network.data.UpdateAnimationData;
 import io.zershyan.sccore.animation.network.data.UpdateRideAnimationData;
@@ -17,6 +18,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 /**
  * 客户端动画服务实现。
@@ -75,13 +77,26 @@ public class ClientAnimationService implements IAnimationService {
      * @return 最高优先级动画条目；无则 {@link Optional#empty()}
      */
     @Override
-    public Optional<Map.Entry<ResourceLocation, ResourceLocation>> getHighestPriorityAnimation() {
+    public Optional<Map.Entry<ResourceLocation, ResourceLocation>> getHighestPriorityAnimation(Predicate<Animation> predicate) {
+        Optional<Map.Entry<ResourceLocation, ResourceLocation>> client = getClientHighestPriorityAnimation(predicate);
+        return client.isEmpty() ? getServerHighestPriorityAnimation(predicate) : client;
+    }
+
+    @Override
+    public Optional<Map.Entry<ResourceLocation, ResourceLocation>> getClientHighestPriorityAnimation(Predicate<Animation> predicate) {
         PlayerAnimations data = getData();
-        HashMap<ResourceLocation, ResourceLocation> clientAnimMap = new HashMap<>(data.clientAnimMap());
-        Optional<Map.Entry<ResourceLocation, ResourceLocation>> max = clientAnimMap.entrySet().stream().max(AnimationHelper.COMPARATOR);
-        if(max.isPresent()) return max;
-        HashMap<ResourceLocation, ResourceLocation> serverAnimMap = new HashMap<>(data.clientAnimMap());
+        HashMap<ResourceLocation, ResourceLocation> serverAnimMap = new HashMap<>(data.serverAnimMap());
         data.rideAnim().layer().ifPresent(layer -> serverAnimMap.put(layer, data.rideAnim().animation().orElseThrow()));
-        return serverAnimMap.entrySet().stream().max(AnimationHelper.COMPARATOR);
+        Map.copyOf(serverAnimMap).forEach((key, value) -> {
+            if(!predicate.test(ClientAnimationRegistry.getAnimation(value))) serverAnimMap.remove(key);
+        });
+        Optional<Map.Entry<ResourceLocation, ResourceLocation>> max = serverAnimMap.entrySet().stream().max(AnimationHelper.COMPARATOR);
+        if(max.isEmpty()) {
+            HashMap<ResourceLocation, ResourceLocation> clientAnimMap = new HashMap<>(data.clientAnimMap());
+            Map.copyOf(clientAnimMap).forEach((key, value) -> {
+                if(!predicate.test(ClientAnimationRegistry.getAnimation(value))) clientAnimMap.remove(key);
+            });
+            return clientAnimMap.entrySet().stream().max(AnimationHelper.COMPARATOR);
+        } else return max;
     }
 }

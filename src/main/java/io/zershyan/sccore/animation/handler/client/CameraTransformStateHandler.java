@@ -40,7 +40,11 @@ public final class CameraTransformStateHandler {
 
     private static void samplePlayer(AbstractClientPlayer player) {
         AnimationHelper helper = SCCAnimationApi.animation(player);
-        Optional<Map.Entry<ResourceLocation, ResourceLocation>> max = helper.getHighestPriorityAnimation();
+        Optional<Map.Entry<ResourceLocation, ResourceLocation>> max = helper.getHighestPriorityAnimation(animation -> {
+            if(animation instanceof ClientAnimation clientAnimation) {
+                return clientAnimation.hasCameraChange();
+            } else return false;
+        });
         if (max.isEmpty()) {
             clear(player.getUUID());
             return;

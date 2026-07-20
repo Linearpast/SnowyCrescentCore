@@ -7,7 +7,6 @@ import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
-import java.util.TreeMap;
 
 /**
  * 客户端动画数据，在 {@link Animation} 基础上增加相机变换（第一人称/第三人称）。
@@ -39,12 +38,12 @@ public class ClientAnimation extends Animation {
             Codec.BOOL.fieldOf("defaultThirdPerson").forGetter(ClientAnimation::defaultThirdPerson)
     ).apply(i, ClientAnimation::new));
     public ClientAnimation(ResourceLocation animationLocation, Optional<String> name, int priority, Optional<RideData> rideData, boolean defaultThirdPerson, CameraChange firstPersonCameraChange, CameraChange cameraChange) {
-        super(animationLocation, name, priority, rideData, defaultThirdPerson, new TreeMap<>());
+        super(animationLocation, name, priority, rideData, defaultThirdPerson, new AABBMovement());
         this.firstPersonCameraChange = firstPersonCameraChange;
         this.cameraChange = cameraChange;
     }
     public ClientAnimation(ResourceLocation animationLocation, @Nullable String name, int priority, @Nullable RideData rideData, boolean defaultThirdPerson, CameraChange firstPersonCameraChange, CameraChange cameraChange) {
-        super(animationLocation, Optional.ofNullable(name), priority, Optional.ofNullable(rideData), defaultThirdPerson, new TreeMap<>());
+        super(animationLocation, Optional.ofNullable(name), priority, Optional.ofNullable(rideData), defaultThirdPerson, new AABBMovement());
         this.firstPersonCameraChange = firstPersonCameraChange;
         this.cameraChange = cameraChange;
     }
@@ -58,6 +57,10 @@ public class ClientAnimation extends Animation {
         super(animation.animationLocation(), Optional.ofNullable(animation.getName()), animation.priority(), Optional.ofNullable(animation.getRideData()), animation.defaultThirdPerson(), animation.aabbMovement());
         this.firstPersonCameraChange = new CameraChange();
         this.cameraChange = new CameraChange();
+    }
+
+    public boolean hasCameraChange() {
+        return !firstPersonCameraChange.isEmpty() || !cameraChange.isEmpty();
     }
 
     public CameraChange firstPersonCameraChange() {

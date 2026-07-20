@@ -1,10 +1,8 @@
 package io.zershyan.sccore.animation.data;
 
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.phys.AABB;
 
 import java.util.Optional;
-import java.util.TreeMap;
 
 /**
  * 动画数据的抽象基类，定义动画的通用属性。
@@ -21,9 +19,9 @@ public abstract class Animation {
     protected final int priority;
     protected final Optional<RideData> rideData;
     protected final boolean defaultThirdPerson;
-    protected final TreeMap<Integer, AABB> aabbMovement;
+    protected final AABBMovement aabbMovement;
 
-    public Animation(ResourceLocation animationLocation, Optional<String> name, int priority, Optional<RideData> rideData, boolean defaultThirdPerson, TreeMap<Integer, AABB> aabbMovement) {
+    public Animation(ResourceLocation animationLocation, Optional<String> name, int priority, Optional<RideData> rideData, boolean defaultThirdPerson, AABBMovement aabbMovement) {
         this.animationLocation = animationLocation;
         this.name = name;
         this.priority = priority;
@@ -33,7 +31,7 @@ public abstract class Animation {
     }
 
     public Animation(ResourceLocation animationLocation, Optional<String> name, int priority, Optional<RideData> rideData) {
-        this(animationLocation, name, priority, rideData, false, new TreeMap<>());
+        this(animationLocation, name, priority, rideData, false, new AABBMovement());
     }
 
     public int priority() {
@@ -56,7 +54,7 @@ public abstract class Animation {
         return defaultThirdPerson;
     }
 
-    public TreeMap<Integer, AABB> aabbMovement() {
+    public AABBMovement aabbMovement() {
         return aabbMovement;
     }
 }
