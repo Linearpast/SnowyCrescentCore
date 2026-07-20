@@ -6,7 +6,10 @@ import io.zershyan.sccore.animation.api.SCCAnimationApi;
 import io.zershyan.sccore.animation.api.data.AnimationHelper;
 import io.zershyan.sccore.animation.core.ClientAnimationRegistry;
 import io.zershyan.sccore.animation.data.ClientAnimation;
-import io.zershyan.sccore.animation.data.EulerAngle;
+import io.zershyan.sccore.animation.data.camera.CameraChange;
+import io.zershyan.sccore.animation.data.camera.CameraData;
+import io.zershyan.sccore.animation.data.camera.EulerAngle;
+import io.zershyan.sccore.animation.data.camera.Vec2;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.resources.ResourceLocation;
@@ -60,22 +63,22 @@ public final class CameraTransformStateHandler {
         e.third = rollSnapshot(e.third, animation.cameraChange(), tick);
     }
 
-    private static Snapshot rollSnapshot(Snapshot previous, ClientAnimation.CameraChange change, int tick) {
+    private static Snapshot rollSnapshot(Snapshot previous, CameraChange change, int tick) {
         Snapshot snap = sample(change, tick);
         if (snap != null) {
             snap.old = previous;
             return snap;
         }
-        Snapshot inactive = new Snapshot(change.relative(), Vec3.ZERO, EulerAngle.ZERO);
+        Snapshot inactive = new Snapshot(Vec2.ZERO, Vec3.ZERO, EulerAngle.ZERO);
         inactive.old = previous;
         return inactive;
     }
 
-    private static Snapshot sample(ClientAnimation.CameraChange change, int tick) {
+    private static Snapshot sample(CameraChange change, int tick) {
         if (change == null || change.movement().isEmpty()) return null;
-        ClientAnimation.CameraData data = change.sample((float) tick);
+        CameraData data = change.sample((float) tick);
         if (data == null) return null;
-        return new Snapshot(change.relative(), data.offset(), data.camEulerAngles());
+        return new Snapshot(data.relativeOffset(), data.offset(), data.eulerAngle());
     }
 
     private static void clear(UUID uuid) {
@@ -94,15 +97,15 @@ public final class CameraTransformStateHandler {
     }
 
     public static class Snapshot {
-        public static final Snapshot ZERO = new Snapshot(false, Vec3.ZERO, EulerAngle.ZERO);
+        public static final Snapshot ZERO = new Snapshot(Vec2.ZERO, Vec3.ZERO, EulerAngle.ZERO);
 
-        public final boolean relative;
+        public final Vec2 relativeOffset;
         public final Vec3 offset;
         public final EulerAngle euler;
         public Snapshot old;
 
-        Snapshot(boolean relative, Vec3 offset, EulerAngle euler) {
-            this.relative = relative;
+        Snapshot(Vec2 relativeOffset, Vec3 offset, EulerAngle euler) {
+            this.relativeOffset = relativeOffset;
             this.offset = offset;
             this.euler = euler;
         }
@@ -123,6 +126,14 @@ public final class CameraTransformStateHandler {
                 Mth.lerp(p, old.offset.x, cur.offset.x),
                 Mth.lerp(p, old.offset.y, cur.offset.y),
                 Mth.lerp(p, old.offset.z, cur.offset.z)
+        );
+    }
+
+    public static Vec2 lerpRelativeOffset(CameraTransformStateHandler.Snapshot old, CameraTransformStateHandler.Snapshot cur, float p) {
+        if (old == null) return cur.relativeOffset;
+        return new Vec2(
+                Mth.lerp(p, old.relativeOffset.x(), cur.relativeOffset.x()),
+                Mth.lerp(p, old.relativeOffset.y(), cur.relativeOffset.y())
         );
     }
 }

@@ -22,6 +22,7 @@ import io.zershyan.sccore.animation.api.events.AnimationRegisterEvent;
 import io.zershyan.sccore.animation.api.events.LayerRegisterEvent;
 import io.zershyan.sccore.animation.data.ClientAnimation;
 import io.zershyan.sccore.animation.data.RideData;
+import io.zershyan.sccore.animation.data.camera.CameraChange;
 import io.zershyan.sccore.animation.imixin.IMixinFactoryHolder;
 import io.zershyan.sccore.animation.registry.attachment.PlayerAnimations;
 import io.zershyan.sccore.api.events.client.ResourceLoadEvent;
@@ -60,9 +61,9 @@ public class ClientAnimationRegistry {
             Codec.INT.optionalFieldOf("priority", 0).forGetter(ClientAnimation::priority),
             RideData.CODEC.optionalFieldOf("rideData").forGetter(ClientAnimation::rideData),
             Codec.BOOL.optionalFieldOf("defaultThirdPerson", false).forGetter(ClientAnimation::defaultThirdPerson),
-            ClientAnimation.CameraChange.CODEC.optionalFieldOf("firstPersonCameraChange", new ClientAnimation.CameraChange(true))
+            CameraChange.CODEC.optionalFieldOf("firstPersonCameraChange", new CameraChange())
                     .forGetter(ClientAnimation::firstPersonCameraChange),
-            ClientAnimation.CameraChange.CODEC.optionalFieldOf("cameraChange", new ClientAnimation.CameraChange(false))
+            CameraChange.CODEC.optionalFieldOf("cameraChange", new CameraChange())
                     .forGetter(ClientAnimation::cameraChange)
     ).apply(i, ClientAnimation::new));
 
@@ -176,8 +177,8 @@ public class ClientAnimationRegistry {
      */
     @Nullable
     public static ClientAnimation getAnimation(ResourceLocation location) {
-        ClientAnimation anim = SyncAnimationFactory.getAnimation(location);
-        if(anim == null) anim = Animations.getOrDefault(location, null);
+        ClientAnimation anim = Animations.getOrDefault(location, null);
+        if(anim == null) anim = SyncAnimationFactory.getAnimation(location);
         return anim;
     }
 
@@ -190,18 +191,9 @@ public class ClientAnimationRegistry {
     @Nullable
     public static KeyframeAnimation getKeyframeAnimation(ResourceLocation location) {
         ClientAnimation animation = getAnimation(location);
+        if(animation == null) animation = SyncAnimationFactory.getAnimation(location);
         if(animation == null) return null;
         return (KeyframeAnimation) PlayerAnimationRegistry.getAnimation(animation.animationLocation());
-    }
-
-    @Nullable
-    public static KeyframeAnimation getKeyframeAnimation(ClientAnimation animation) {
-        return (KeyframeAnimation) PlayerAnimationRegistry.getAnimation(animation.animationLocation());
-    }
-
-    @Nullable
-    public static Boolean isServerAnimation(ResourceLocation location) {
-        return SyncAnimationFactory.getAnimations().containsKey(location) || Animations.containsKey(location) ? false : null;
     }
 
     /**

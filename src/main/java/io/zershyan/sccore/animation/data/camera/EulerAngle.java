@@ -1,4 +1,4 @@
-package io.zershyan.sccore.animation.data;
+package io.zershyan.sccore.animation.data.camera;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -21,5 +21,12 @@ public record EulerAngle(float pitch, float yaw, float roll) {
     /** 返回各分量相加后的新欧拉角。 */
     public EulerAngle add(float pitch, float yaw, float roll) {
         return new EulerAngle(this.pitch + pitch, this.yaw + yaw, this.roll + roll);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) return true;
+        if (!(other instanceof EulerAngle(float pitch1, float yaw1, float roll1))) return false;
+        return Double.compare(pitch1, this.pitch) == 0 && Double.compare(yaw1, this.yaw) == 0 &&  Double.compare(roll1, this.roll) == 0;
     }
 }

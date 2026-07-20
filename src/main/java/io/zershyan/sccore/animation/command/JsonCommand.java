@@ -11,9 +11,10 @@ import io.zershyan.sccore.animation.core.ClientAnimationRegistry;
 import io.zershyan.sccore.animation.core.ServerAnimationRegistry;
 import io.zershyan.sccore.animation.core.SyncAnimationFactory;
 import io.zershyan.sccore.animation.data.ClientAnimation;
-import io.zershyan.sccore.animation.data.EulerAngle;
 import io.zershyan.sccore.animation.data.RideData;
 import io.zershyan.sccore.animation.data.ServerAnimation;
+import io.zershyan.sccore.animation.data.camera.CameraChange;
+import io.zershyan.sccore.animation.data.camera.CameraData;
 import io.zershyan.sccore.common.datagen.init.SCCTranslatableLang;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
@@ -56,15 +57,15 @@ public class JsonCommand {
 
             Path clientAnimExample = dir.resolve("example_client_animation.json");
             if(!Files.exists(clientAnimExample)) Files.createFile(clientAnimExample);
-            TreeMap<Integer, ClientAnimation.CameraData> movement = new TreeMap<>();
-            TreeMap<Integer, ClientAnimation.CameraData> movement1 = new TreeMap<>();
-            movement.put(1, new ClientAnimation.CameraData(Vec3.ZERO, EulerAngle.ZERO));
-            movement1.put(2, new ClientAnimation.CameraData(Vec3.ZERO, EulerAngle.ZERO));
+            TreeMap<Integer, CameraData> movement = new TreeMap<>();
+            TreeMap<Integer, CameraData> movement1 = new TreeMap<>();
+            movement.put(1, CameraData.ZERO);
+            movement1.put(2, CameraData.ZERO);
             ClientAnimation clientAnimation = new ClientAnimation(
                     SCCore.id("animation_key"), Optional.of("测试动画"), 0,
                     Optional.of(new RideData(List.of(SCCore.id("sub_animation")), new Vec3(0, 0, 0), 100, 90, 0)), true,
-                    new ClientAnimation.CameraChange(true, movement),
-                    new ClientAnimation.CameraChange(false, movement1)
+                    new CameraChange(movement),
+                    new CameraChange(movement1)
             );
             JsonElement exampleClientAnimationJson = ClientAnimationRegistry.CLIENT_ANIMATION_CODEC.encodeStart(JsonOps.INSTANCE, clientAnimation).getOrThrow();
             Files.writeString(clientAnimExample, gson.toJson(exampleClientAnimationJson), StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);

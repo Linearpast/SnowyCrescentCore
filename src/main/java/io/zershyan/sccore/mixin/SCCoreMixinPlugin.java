@@ -1,5 +1,7 @@
 package io.zershyan.sccore.mixin;
 
+import net.neoforged.fml.loading.LoadingModList;
+import net.neoforged.fml.loading.moddiscovery.ModInfo;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
@@ -18,8 +20,19 @@ public class SCCoreMixinPlugin implements IMixinConfigPlugin {
         return null;
     }
 
+    private static final String[] mixinMods = {
+            "playeranimator"
+    };
+
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
+        List<ModInfo> modInfos = LoadingModList.get().getMods();
+        List<String> modList = modInfos.stream().map(ModInfo::getModId).toList();
+        for (String modid : mixinMods) {
+            if (mixinClassName.startsWith(this.getClass().getPackageName() + "." + modid + ".")) {
+                return modList.contains(modid);
+            }
+        }
         return true;
     }
 

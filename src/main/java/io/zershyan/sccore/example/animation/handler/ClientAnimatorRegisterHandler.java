@@ -4,8 +4,9 @@ import io.zershyan.sccore.SCCore;
 import io.zershyan.sccore.animation.api.SCCAnimationApi;
 import io.zershyan.sccore.animation.api.events.AnimationRegisterEvent;
 import io.zershyan.sccore.animation.api.events.LayerRegisterEvent;
-import io.zershyan.sccore.animation.data.ClientAnimation;
-import io.zershyan.sccore.animation.data.EulerAngle;
+import io.zershyan.sccore.animation.data.camera.CameraChange;
+import io.zershyan.sccore.animation.data.camera.CameraData;
+import io.zershyan.sccore.animation.data.camera.EulerAngle;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
@@ -25,10 +26,10 @@ public class ClientAnimatorRegisterHandler {
 
     @SubscribeEvent
     public static void registerAnimationClient(AnimationRegisterEvent.Client event) {
-        TreeMap<Integer, ClientAnimation.CameraData> movement = new TreeMap<>();
-        movement.put(0, new ClientAnimation.CameraData(new Vec3(0,-1.5,0), new EulerAngle(0f, 90f,90f)));
+        TreeMap<Integer, CameraData> movement = new TreeMap<>();
+        movement.put(0, CameraData.of(new Vec3(0,-1.5,0), new EulerAngle(0f, 90f,90f)));
         event.createAnimation(testAnimClient, SCCore.id("am_lying_to_right_lying"))
-                .firstPersonCameraChange(new ClientAnimation.CameraChange(false, movement))
+                .firstPersonCameraChange(new CameraChange(movement))
                 .name("华尔兹（男）");
     }
 

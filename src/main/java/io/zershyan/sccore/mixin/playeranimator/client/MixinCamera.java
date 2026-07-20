@@ -1,14 +1,15 @@
 package io.zershyan.sccore.mixin.playeranimator.client;
 
-import io.zershyan.sccore.animation.data.EulerAngle;
+import io.zershyan.sccore.animation.data.camera.EulerAngle;
+import io.zershyan.sccore.animation.data.camera.Vec2;
 import io.zershyan.sccore.animation.handler.client.CameraTransformStateHandler;
 import net.minecraft.client.Camera;
+import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Vector3f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -23,15 +24,6 @@ public abstract class MixinCamera {
     @Shadow
     protected abstract void setPosition(double x, double y, double z);
 
-    @Shadow
-    public abstract Vector3f getLookVector();
-
-    @Shadow
-    public abstract Vector3f getUpVector();
-
-    @Shadow
-    public abstract Vector3f getLeftVector();
-
     @Inject(
             method = "setup",
             at = @At("TAIL")
@@ -41,11 +33,13 @@ public abstract class MixinCamera {
         LocalPlayer player = instance.player;
         if (player == null) return;
 
+        if(instance.options.getCameraType() == CameraType.THIRD_PERSON_FRONT) return;
         boolean firstPerson = instance.options.getCameraType().isFirstPerson();
         CameraTransformStateHandler.Snapshot cur = CameraTransformStateHandler.get(player.getUUID(), firstPerson);
         if(cur == CameraTransformStateHandler.Snapshot.ZERO) return;
 
         EulerAngle euler = CameraTransformStateHandler.lerpEuler(cur.old, cur, partialTick);
+        Vec2 relativeOffset = CameraTransformStateHandler.lerpRelativeOffset(cur.old, cur, partialTick);
         Vec3 offset = CameraTransformStateHandler.lerpOffset(cur.old, cur, partialTick);
 
         float yaw = player.getViewYRot(partialTick) + euler.yaw();
@@ -53,21 +47,18 @@ public abstract class MixinCamera {
         float roll = euler.roll();
         setRotation(yaw, pitch, roll);
 
-        if (cur.relative) {
-            Vector3f look = getLookVector();
-            Vector3f up = getUpVector();
-            Vector3f right = getLeftVector();
-            Vec3 forward = new Vec3(look.x(), look.y(), look.z());
-            Vec3 upVec = new Vec3(up.x(), up.y(), up.z());
-            Vec3 rightVec = new Vec3(-right.x(), -right.y(), -right.z());
-            Vec3 worldOffset = forward.scale(offset.y)
-                    .add(upVec.scale(offset.z))
-                    .add(rightVec.scale(offset.x));
-            Vec3 pos = player.getEyePosition(partialTick).add(worldOffset);
-            setPosition(pos.x, pos.y, pos.z);
-        } else {
-            Vec3 pos = player.getEyePosition(partialTick).add(offset);
-            setPosition(pos.x, pos.y, pos.z);
+        Vec3 pos = player.getEyePosition(partialTick);
+        if (!cur.relativeOffset.equals(Vec2.ZERO)) {
+            float xRot = -player.getPreciseBodyRotation(partialTick);
+            double radians = Math.toRadians(xRot);
+            double x = Math.sin(radians) * relativeOffset.y() + Math.cos(radians) * relativeOffset.x();
+            double z = Math.cos(radians) * relativeOffset.y() + Math.sin(radians) * relativeOffset.x();
+            pos = pos.add(x, 0, z);
         }
+        if (!cur.offset.equals(Vec3.ZERO)){
+            pos = pos.add(offset);
+        }
+        if(pos.equals(player.getEyePosition(partialTick))) return;
+        setPosition(pos.x, pos.y, pos.z);
     }
 }

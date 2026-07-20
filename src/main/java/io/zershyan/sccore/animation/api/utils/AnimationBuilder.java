@@ -4,6 +4,7 @@ import io.zershyan.sccore.animation.data.Animation;
 import io.zershyan.sccore.animation.data.ClientAnimation;
 import io.zershyan.sccore.animation.data.RideData;
 import io.zershyan.sccore.animation.data.ServerAnimation;
+import io.zershyan.sccore.animation.data.camera.CameraChange;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -32,7 +33,8 @@ import java.util.function.UnaryOperator;
  * @see RideDataBuilder
  * @see io.zershyan.sccore.animation.api.events.AnimationRegisterEvent
  */
-public abstract class AnimationBuilder {
+public abstract class AnimationBuilder<T extends AnimationBuilder<?>> {
+    private T builder;
     protected final ResourceLocation animationLocation;
     @Nullable
     protected String name = null;
@@ -49,16 +51,20 @@ public abstract class AnimationBuilder {
         this.animationLocation = animationLocation;
     }
 
+    void setBuilder(T builder) {
+        this.builder = builder;
+    }
+
     /** 设置动画的可选名称。 */
-    public AnimationBuilder name(@Nullable String name) {
+    public T name(@Nullable String name) {
         this.name = name;
-        return this;
+        return builder;
     }
 
     /** 设置动画优先级，数值越高优先级越高。 */
-    public AnimationBuilder priority(int priority) {
+    public T priority(int priority) {
         this.priority = priority;
-        return this;
+        return builder;
     }
 
     /**
@@ -67,28 +73,28 @@ public abstract class AnimationBuilder {
      * @param operator 对新建的 {@link RideDataBuilder} 执行配置并返回
      * @return 当前构建器
      */
-    public AnimationBuilder rideData(UnaryOperator<RideDataBuilder> operator) {
+    public T rideData(UnaryOperator<RideDataBuilder> operator) {
         this.rideData = operator.apply(new RideDataBuilder()).build();
-        return this;
+        return builder;
     }
 
     /** 设置动画是否默认切换到第三人称视角。 */
-    public AnimationBuilder defaultThirdPerson(boolean defaultThirdPerson) {
+    public T defaultThirdPerson(boolean defaultThirdPerson) {
         this.defaultThirdPerson = defaultThirdPerson;
-        return this;
+        return builder;
     }
 
     /** 替换整个 AABB 移动时间线。 */
-    public AnimationBuilder aabbMovement(TreeMap<Integer, AABB> aabbMovement) {
+    public T aabbMovement(TreeMap<Integer, AABB> aabbMovement) {
         this.aabbMovement.clear();
         this.aabbMovement.putAll(aabbMovement);
-        return this;
+        return builder;
     }
 
     /** 在指定 tick 处添加一个 AABB 关键帧。 */
-    public AnimationBuilder addAABBMovement(int tick, AABB aabb) {
+    public T addAABBMovement(int tick, AABB aabb) {
         this.aabbMovement.put(tick, aabb);
-        return this;
+        return builder;
     }
 
     /**
@@ -103,11 +109,12 @@ public abstract class AnimationBuilder {
      *
      * @see ServerAnimation
      */
-    public static class Server extends AnimationBuilder {
+    public static class Server extends AnimationBuilder<Server> {
         private float jumpModifier = 1.0f;
 
         private Server(ResourceLocation animationLocation) {
             super(animationLocation);
+            this.setBuilder(this);
         }
 
         /** 创建服务端动画构建器。 */
@@ -141,14 +148,15 @@ public abstract class AnimationBuilder {
      *
      * @see ClientAnimation
      */
-    public static class Client extends AnimationBuilder {
+    public static class Client extends AnimationBuilder<Client> {
         @NotNull
-        private ClientAnimation.CameraChange firstPersonCameraChange = new ClientAnimation.CameraChange(true);
+        private CameraChange firstPersonCameraChange = new CameraChange();
         @NotNull
-        private ClientAnimation.CameraChange cameraChange = new ClientAnimation.CameraChange(false);
+        private CameraChange cameraChange = new CameraChange();
 
         private Client(ResourceLocation animationLocation) {
             super(animationLocation);
+            this.setBuilder(this);
         }
 
         /** 创建客户端动画构建器。 */
@@ -171,13 +179,13 @@ public abstract class AnimationBuilder {
         }
 
         /** 设置第一人称相机变换。 */
-        public Client firstPersonCameraChange(ClientAnimation.CameraChange firstPersonCameraChange) {
+        public Client firstPersonCameraChange(CameraChange firstPersonCameraChange) {
             this.firstPersonCameraChange = firstPersonCameraChange;
             return this;
         }
 
         /** 设置第三人称相机变换。 */
-        public Client cameraChange(ClientAnimation.CameraChange cameraChange) {
+        public Client cameraChange(CameraChange cameraChange) {
             this.cameraChange = cameraChange;
             return this;
         }
