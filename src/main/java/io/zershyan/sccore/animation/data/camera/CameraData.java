@@ -2,6 +2,7 @@ package io.zershyan.sccore.animation.data.camera;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -25,6 +26,48 @@ public record CameraData(Vec2 relativeOffset, Vec3 offset, EulerAngle eulerAngle
 
     public static CameraData of(Vec2 relativeOffset, Vec3 offset, EulerAngle camEulerAngles) {
         return new CameraData(relativeOffset, offset, camEulerAngles);
+    }
+
+    public static boolean isOrNearEmpty(CameraData cameraData) {
+        return cameraData == null || ZERO.equals(cameraData);
+    }
+
+    public CameraData sample(float delta, CameraData next) {
+        Vec2 relativeOffset = new Vec2(
+                lerp(delta, relativeOffset().x(), next.relativeOffset().x()),
+                lerp(delta, relativeOffset().y(), next.relativeOffset().y())
+        );
+        Vec3 offset = new Vec3(
+                lerp(delta, offset().x, next.offset().x),
+                lerp(delta, offset().y, next.offset().y),
+                lerp(delta, offset().z, next.offset().z)
+        );
+        EulerAngle euler = new EulerAngle(
+                lerp(delta, eulerAngle().pitch(), next.eulerAngle().pitch()),
+                lerp(delta, eulerAngle().yaw(), next.eulerAngle().yaw()),
+                lerp(delta, eulerAngle().roll(), next.eulerAngle().roll())
+        );
+        return new CameraData(relativeOffset, offset, euler);
+    }
+
+    private float lerp(float delta, float a, float b) {
+        return (float) lerp((double) delta, a, b);
+    }
+
+    private double lerp(double delta, double a, double b) {
+        double sub = b - a;
+        double abs = Math.abs(sub);
+        double v = 0.05 / 120;
+        if(abs <= v) return b;
+        if(abs <= 0.05) {
+            if(sub < 0) {
+                a -= v;
+            } else if(sub > 0) {
+                a += v;
+            }
+            return a;
+        }
+        return Mth.lerp(delta, a, b);
     }
 
     @Override

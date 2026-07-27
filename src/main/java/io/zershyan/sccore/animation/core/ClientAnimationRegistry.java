@@ -52,7 +52,7 @@ import java.util.*;
 public class ClientAnimationRegistry {
     private static final Map<ResourceLocation, Integer> Layers = new HashMap<>();
     private static final Map<ResourceLocation, ClientAnimation> Animations = new HashMap<>();
-    private static final Map<UUID, Map<ResourceLocation, IAnimation>> cacheLayers = new HashMap<>();
+    private static final Map<UUID, Map<ResourceLocation, IAnimation>> CacheAnim = new HashMap<>();
     public static final String LAYER_DIR = "animation/layer/";
     public static final String ANIMATION_DIR = "animation/animation/";
     public static final Codec<ClientAnimation> CLIENT_ANIMATION_CODEC = RecordCodecBuilder.create(i -> i.group(
@@ -126,12 +126,8 @@ public class ClientAnimationRegistry {
         layers.forEach((key, value) -> PlayerAnimationFactory.ANIMATION_DATA_FACTORY.registerFactory(
                 key, value, player -> {
                     if(instance.player == null) return registerPlayerAnimation(player);
-                    Map<ResourceLocation, IAnimation> animationMap = cacheLayers.getOrDefault(player.getUUID(), new HashMap<>());
-                    if(animationMap.containsKey(key)) return animationMap.get(key);
-                    IAnimation iAnimation = registerPlayerAnimation(player);
-                    animationMap.put(key, iAnimation);
-                    cacheLayers.put(player.getUUID(), animationMap);
-                    return iAnimation;
+                    return CacheAnim.computeIfAbsent(player.getUUID(), uuid -> new HashMap<>())
+                            .computeIfAbsent(key, k -> registerPlayerAnimation(player));
                 })
         );
         if(instance.level == null) return;
@@ -167,6 +163,10 @@ public class ClientAnimationRegistry {
     private static KeyframeAnimation getAnimationOfPair(Pair<Integer, IAnimation> pair) {
         return Optional.ofNullable((KeyframeAnimationPlayer) ((ModifierLayer<?>) pair.getRight()).getAnimation())
                 .map(KeyframeAnimationPlayer::getData).orElse(null);
+    }
+
+    public static Map<UUID, Map<ResourceLocation, IAnimation>> getCacheAnim() {
+        return CacheAnim;
     }
 
     /**

@@ -1,8 +1,12 @@
 package io.zershyan.sccore.animation.handler.client;
 
+import dev.kosmx.playerAnim.api.layered.IAnimation;
 import dev.kosmx.playerAnim.api.layered.KeyframeAnimationPlayer;
+import dev.kosmx.playerAnim.api.layered.ModifierLayer;
 import io.zershyan.sccore.SCCore;
 import io.zershyan.sccore.animation.api.SCCAnimationApi;
+import io.zershyan.sccore.animation.api.client.AnimationPlayerHelper;
+import io.zershyan.sccore.animation.core.ClientAnimationRegistry;
 import io.zershyan.sccore.animation.network.data.MovementAnimationTickData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
@@ -49,6 +53,30 @@ public class AnimationPlayerHandler {
             if(currentAnimation.isActive()) return;
             MovementAnimationTickData movementAnimationTickData = new MovementAnimationTickData(player.getUUID(), Optional.empty(), 0);
             PacketDistributor.sendToServer(movementAnimationTickData);
+        } catch (Exception ignored) { }
+    }
+
+    @SubscribeEvent
+    public static void clearStopAnimation(ClientTickEvent.Pre event) {
+        try {
+            Minecraft instance = Minecraft.getInstance();
+            if(instance.level == null) return;
+            if (instance.player == null) return;
+            if (instance.player.tickCount % 20 != 0) return;
+            for (AbstractClientPlayer player : instance.level.players()) {
+                AnimationPlayerHelper helper = SCCAnimationApi.animPlayer(player);
+                Map<ResourceLocation, IAnimation> map = ClientAnimationRegistry.getCacheAnim().get(player.getUUID());
+                if(map == null) continue;
+                map.forEach((key, iAnimation) -> {
+                    try {
+                        IAnimation animation = ((ModifierLayer<?>) iAnimation).getAnimation();
+                        if (animation == null) return;
+                        if (!animation.isActive()) {
+                            helper.removeAnimation(key);
+                        }
+                    } catch (Exception ignored) { }
+                });
+            }
         } catch (Exception ignored) { }
     }
 }

@@ -2,8 +2,6 @@ package io.zershyan.sccore.animation.data.camera;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.util.Mth;
-import net.minecraft.world.phys.Vec3;
 
 import java.util.Map;
 import java.util.TreeMap;
@@ -12,16 +10,20 @@ import java.util.function.Function;
 /**
  * 相机变换关键帧序列，按 tick 存储相机偏移与欧拉角，支持线性插值采样。
  */
-public record CameraChange(TreeMap<Integer, CameraData> movement) {
+public record CameraChange(TreeMap<Integer, CameraData> movement, boolean relativeEuler) {
     public CameraChange() {
-        this(new TreeMap<>());
+        this(new TreeMap<>(), true);
+    }
+    public CameraChange(TreeMap<Integer, CameraData> movement) {
+        this(movement, true);
     }
 
     public static final Codec<CameraChange> CODEC = RecordCodecBuilder.create(i -> i.group(
             Codec.unboundedMap(Codec.STRING.xmap(Integer::parseInt, Object::toString), CameraData.CODEC)
                     .xmap(TreeMap::new, Function.identity())
                     .fieldOf("movement")
-                    .forGetter(CameraChange::movement)
+                    .forGetter(CameraChange::movement),
+            Codec.BOOL.optionalFieldOf("relativeEuler", true).forGetter(CameraChange::relativeEuler)
     ).apply(i, CameraChange::new));
 
     /**
@@ -42,21 +44,7 @@ public record CameraChange(TreeMap<Integer, CameraData> movement) {
         float alpha = (tick - floorEntry.getKey()) / delta;
         CameraData a = floorEntry.getValue();
         CameraData b = ceilEntry.getValue();
-        Vec2 relativeOffset = new Vec2(
-                Mth.lerp(alpha, a.relativeOffset().x(), b.relativeOffset().x()),
-                Mth.lerp(alpha, a.relativeOffset().y(), b.relativeOffset().y())
-        );
-        Vec3 offset = new Vec3(
-                Mth.lerp(alpha, a.offset().x, b.offset().x),
-                Mth.lerp(alpha, a.offset().y, b.offset().y),
-                Mth.lerp(alpha, a.offset().z, b.offset().z)
-        );
-        EulerAngle euler = new EulerAngle(
-                Mth.lerp(alpha, a.eulerAngle().pitch(), b.eulerAngle().pitch()),
-                Mth.lerp(alpha, a.eulerAngle().yaw(), b.eulerAngle().yaw()),
-                Mth.lerp(alpha, a.eulerAngle().roll(), b.eulerAngle().roll())
-        );
-        return new CameraData(relativeOffset, offset, euler);
+        return a.sample(alpha, b);
     }
 
     public boolean isEmpty() {

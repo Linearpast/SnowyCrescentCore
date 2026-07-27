@@ -2,6 +2,7 @@ package io.zershyan.sccore.mixin.playeranimator.client;
 
 import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.ref.LocalDoubleRef;
+import io.zershyan.sccore.animation.data.camera.CameraData;
 import io.zershyan.sccore.animation.handler.client.CameraTransformStateHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -23,17 +24,18 @@ public class MixinEntity {
         LocalPlayer player = mc.player;
         if (player == null) return;
         boolean firstPerson = mc.options.getCameraType().isFirstPerson();
-        CameraTransformStateHandler.Snapshot cur = CameraTransformStateHandler.get(player.getUUID(), firstPerson);
-        float roll = cur.euler.roll();
+        CameraData cache = CameraTransformStateHandler.getCache(player, firstPerson);
+        if(cache == null) return;
+        float roll = cache.eulerAngle().roll();
         if (roll == 0f) return;
         double dx = yRot.get();
         double dy = xRot.get();
-        double rad = Math.toRadians(-roll);
+        double rad = Math.toRadians(roll);
         double cos = Math.cos(rad);
         double sin = Math.sin(rad);
         double ndx = dx * cos - dy * sin;
         double ndy = dx * sin + dy * cos;
-        yRot.set(-ndx);
-        xRot.set(-ndy);
+        yRot.set(ndx);
+        xRot.set(ndy);
     }
 }
