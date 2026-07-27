@@ -15,7 +15,7 @@ public class AABBMovement {
             Codec.unboundedMap(Codec.STRING.xmap(Integer::parseInt, Object::toString), Vec3.CODEC.listOf(2, 2).xmap(
                     vec3s -> new AABB(vec3s.getFirst(), vec3s.getLast()),
                     ab -> List.of(new Vec3(ab.minX, ab.minY, ab.minZ), new Vec3(ab.maxX, ab.maxY, ab.maxZ))
-            )).xmap(TreeMap::new, Function.identity()).fieldOf("aabbMovement").forGetter(AABBMovement::getMovementTree)
+            )).xmap(TreeMap::new, Function.identity()).optionalFieldOf("aabbMovement", new TreeMap<>()).forGetter(AABBMovement::getMovementTree)
     ).apply(i, AABBMovement::of));
     private final TreeMap<Integer, AABB> movementTree = new TreeMap<>();
     private boolean relative = true;

@@ -2,15 +2,11 @@ package io.zershyan.sccore.animation.core;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.zershyan.sccore.SCCore;
 import io.zershyan.sccore.animation.api.events.AnimationRegisterEvent;
 import io.zershyan.sccore.animation.api.events.LayerRegisterEvent;
-import io.zershyan.sccore.animation.data.AABBMovement;
 import io.zershyan.sccore.animation.data.Animation;
-import io.zershyan.sccore.animation.data.RideData;
 import io.zershyan.sccore.animation.data.ServerAnimation;
 import io.zershyan.sccore.animation.network.data.RegisterAnimationData;
 import io.zershyan.sccore.animation.network.data.RegisterLayerData;
@@ -48,16 +44,6 @@ public class ServerAnimationRegistry {
     private static final Map<ResourceLocation, ServerAnimation> Animations = new HashMap<>();
     public static final String LAYER_DIR = "animation/layer/";
     public static final String ANIMATION_DIR = "animation/animation/";
-
-    public static final Codec<ServerAnimation> SERVER_ANIMATION_CODEC = RecordCodecBuilder.create(i -> i.group(
-            ResourceLocation.CODEC.fieldOf("animationLocation").forGetter(Animation::animationLocation),
-            Codec.STRING.optionalFieldOf("name").forGetter(Animation::name),
-            Codec.INT.optionalFieldOf("priority", 0).forGetter(Animation::priority),
-            RideData.CODEC.optionalFieldOf("rideData").forGetter(Animation::rideData),
-            Codec.BOOL.optionalFieldOf("defaultThirdPerson", false).forGetter(Animation::defaultThirdPerson),
-            AABBMovement.CODEC.optionalFieldOf("aabbMovement", new AABBMovement()).forGetter(Animation::aabbMovement),
-            Codec.FLOAT.optionalFieldOf("jumpModifier", 1.0f).forGetter(ServerAnimation::jumpModifier)
-    ).apply(i, ServerAnimation::new));
 
     @SubscribeEvent
     public static void serverInit(ServerAboutToStartEvent event) {
@@ -108,7 +94,7 @@ public class ServerAnimationRegistry {
         animationResourceMap.forEach((location, resource) -> {
             try (BufferedReader reader = resource.openAsReader()){
                 JsonElement element = JsonParser.parseReader(reader);
-                Animations.put(location, SERVER_ANIMATION_CODEC.parse(JsonOps.INSTANCE, element).getOrThrow());
+                Animations.put(location, ServerAnimation.CODEC.parse(JsonOps.INSTANCE, element).getOrThrow());
             } catch (Exception e) {
                 SCCore.log.error(e.getMessage());
             }

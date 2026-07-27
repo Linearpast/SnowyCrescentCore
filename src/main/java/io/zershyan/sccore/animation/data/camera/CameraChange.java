@@ -21,7 +21,7 @@ public record CameraChange(TreeMap<Integer, CameraData> movement, boolean relati
     public static final Codec<CameraChange> CODEC = RecordCodecBuilder.create(i -> i.group(
             Codec.unboundedMap(Codec.STRING.xmap(Integer::parseInt, Object::toString), CameraData.CODEC)
                     .xmap(TreeMap::new, Function.identity())
-                    .fieldOf("movement")
+                    .optionalFieldOf("movement", new TreeMap<>())
                     .forGetter(CameraChange::movement),
             Codec.BOOL.optionalFieldOf("relativeEuler", true).forGetter(CameraChange::relativeEuler)
     ).apply(i, CameraChange::new));

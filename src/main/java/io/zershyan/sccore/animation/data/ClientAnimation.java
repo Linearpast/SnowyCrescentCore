@@ -24,18 +24,18 @@ public class ClientAnimation extends Animation {
     public static final Codec<ClientAnimation> CODEC = RecordCodecBuilder.create(i -> i.group(
             ResourceLocation.CODEC.fieldOf("animationLocation").forGetter(ClientAnimation::animationLocation),
             Codec.STRING.optionalFieldOf("name").forGetter(ClientAnimation::name),
-            Codec.INT.fieldOf("priority").forGetter(ClientAnimation::priority),
+            Codec.INT.optionalFieldOf("priority", 0).forGetter(ClientAnimation::priority),
             RideData.CODEC.optionalFieldOf("rideData").forGetter(ClientAnimation::rideData),
-            Codec.BOOL.fieldOf("defaultThirdPerson").forGetter(ClientAnimation::defaultThirdPerson),
-            CameraChange.CODEC.fieldOf("firstPersonCameraChange").forGetter(ClientAnimation::firstPersonCameraChange),
-            CameraChange.CODEC.fieldOf("cameraChange").forGetter(ClientAnimation::cameraChange)
+            Codec.BOOL.optionalFieldOf("defaultThirdPerson", false).forGetter(ClientAnimation::defaultThirdPerson),
+            CameraChange.CODEC.optionalFieldOf("firstPersonCameraChange", new CameraChange()).forGetter(ClientAnimation::firstPersonCameraChange),
+            CameraChange.CODEC.optionalFieldOf("cameraChange", new CameraChange()).forGetter(ClientAnimation::cameraChange)
     ).apply(i, ClientAnimation::new));
     public static final Codec<ClientAnimation> SUB_CODEC = RecordCodecBuilder.create(i -> i.group(
             ResourceLocation.CODEC.fieldOf("animationLocation").forGetter(ClientAnimation::animationLocation),
             Codec.STRING.optionalFieldOf("name").forGetter(ClientAnimation::name),
-            Codec.INT.fieldOf("priority").forGetter(ClientAnimation::priority),
+            Codec.INT.optionalFieldOf("priority", 0).forGetter(ClientAnimation::priority),
             RideData.CODEC.optionalFieldOf("rideData").forGetter(ClientAnimation::rideData),
-            Codec.BOOL.fieldOf("defaultThirdPerson").forGetter(ClientAnimation::defaultThirdPerson)
+            Codec.BOOL.optionalFieldOf("defaultThirdPerson", false).forGetter(ClientAnimation::defaultThirdPerson)
     ).apply(i, ClientAnimation::new));
     public ClientAnimation(ResourceLocation animationLocation, Optional<String> name, int priority, Optional<RideData> rideData, boolean defaultThirdPerson, CameraChange firstPersonCameraChange, CameraChange cameraChange) {
         super(animationLocation, name, priority, rideData, defaultThirdPerson, new AABBMovement());

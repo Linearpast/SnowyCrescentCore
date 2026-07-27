@@ -11,9 +11,9 @@ import net.minecraft.world.phys.Vec3;
 public record CameraData(Vec2 relativeOffset, Vec3 offset, EulerAngle eulerAngle) {
     public static final CameraData ZERO = new CameraData(Vec2.ZERO, Vec3.ZERO, EulerAngle.ZERO);
     public static final Codec<CameraData> CODEC = RecordCodecBuilder.create(i -> i.group(
-            Vec2.CODEC.fieldOf("relativeOffset").forGetter(CameraData::relativeOffset),
-            Vec3.CODEC.fieldOf("offset").forGetter(CameraData::offset),
-            EulerAngle.CODEC.fieldOf("eulerAngle").forGetter(CameraData::eulerAngle)
+            Vec2.CODEC.optionalFieldOf("relativeOffset", Vec2.ZERO).forGetter(CameraData::relativeOffset),
+            Vec3.CODEC.optionalFieldOf("offset", Vec3.ZERO).forGetter(CameraData::offset),
+            EulerAngle.CODEC.optionalFieldOf("eulerAngle", EulerAngle.ZERO).forGetter(CameraData::eulerAngle)
     ).apply(i, CameraData::new));
 
     public static CameraData ofRelative(Vec2 relativeOffset, EulerAngle camEulerAngles) {

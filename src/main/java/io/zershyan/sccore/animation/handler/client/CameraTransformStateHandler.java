@@ -6,8 +6,8 @@ import io.zershyan.sccore.animation.api.SCCAnimationApi;
 import io.zershyan.sccore.animation.api.data.AnimationHelper;
 import io.zershyan.sccore.animation.core.ClientAnimationRegistry;
 import io.zershyan.sccore.animation.data.ClientAnimation;
-import io.zershyan.sccore.animation.data.camera.CameraChange;
 import io.zershyan.sccore.animation.data.camera.CameraData;
+import io.zershyan.sccore.animation.data.camera.CameraStateSnapShot;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.resources.ResourceLocation;
@@ -25,84 +25,7 @@ import java.util.UUID;
 
 @EventBusSubscriber(modid = SCCore.MODID, value = Dist.CLIENT)
 public final class CameraTransformStateHandler {
-    private static final Map<UUID, SnapShot> SnapShots = new HashMap<>();
-    public static class SnapShot {
-        @Nullable ClientAnimation curAnimation;
-        @Nullable KeyframeAnimationPlayer curKeyframeAnimation;
-        @Nullable CameraData cacheFirst;
-        @Nullable CameraData cacheThird;
-
-        SnapShot() {
-            this.curAnimation = null;
-            this.curKeyframeAnimation = null;
-            this.cacheFirst = null;
-            this.cacheThird = null;
-        }
-
-        public @Nullable ClientAnimation getCurAnimation() {
-            return curAnimation;
-        }
-
-        public void setCurAnimation(@Nullable ClientAnimation curAnimation) {
-            this.curAnimation = curAnimation;
-        }
-
-        public @Nullable KeyframeAnimationPlayer getCurKeyframeAnimation() {
-            return curKeyframeAnimation;
-        }
-
-        public void setCurKeyframeAnimation(@Nullable KeyframeAnimationPlayer curKeyframeAnimation) {
-            this.curKeyframeAnimation = curKeyframeAnimation;
-        }
-
-        public void clearAnimation() {
-            this.curAnimation = null;
-            this.curKeyframeAnimation = null;
-        }
-
-        public @Nullable CameraData getCache(boolean firstPerson) {
-            return firstPerson ? cacheFirst : cacheThird;
-        }
-
-        public @Nullable CameraData get(float partialTick, boolean firstPerson) {
-            CameraData cache = firstPerson ? cacheFirst : cacheThird;
-            if(curAnimation == null) curKeyframeAnimation = null;
-            if(curKeyframeAnimation == null && CameraData.isOrNearEmpty(cache)) {
-                curAnimation = null;
-                return firstPerson ? (cacheFirst = null) : (cacheThird = null);
-            }
-            CameraData absData = calAbsolutionCurrentData(partialTick, firstPerson);
-            if (absData == null) absData = CameraData.ZERO;
-            if (cache == null) cache = absData;
-
-            float deltaTicks = Minecraft.getInstance().getTimer().getGameTimeDeltaTicks();
-            float delta = deltaTicks / 5.0F;
-            if (delta == 0.0F) delta = 0.0022857143F;
-            CameraData sample = cache.sample(delta, absData);
-            return firstPerson ? (cacheFirst = sample) : (cacheThird = sample);
-        }
-
-        public @Nullable CameraData calAbsolutionCurrentData(float partialTick, boolean firstPerson) {
-            if(curKeyframeAnimation == null) return null;
-            CameraChange cameraChange = getCameraChange(firstPerson);
-            if(cameraChange == null) return null;
-            return cameraChange.sample(curKeyframeAnimation.getCurrentTick() + partialTick);
-        }
-
-        public boolean relativeEuler(boolean firstPerson) {
-            if(curKeyframeAnimation == null) return true;
-            CameraChange cameraChange = getCameraChange(firstPerson);
-            if(cameraChange == null) return true;
-            return cameraChange.relativeEuler();
-        }
-
-        private @Nullable CameraChange getCameraChange(boolean firstPerson) {
-            if(curAnimation == null) return null;
-            if(curKeyframeAnimation == null) return null;
-            if(!curAnimation.hasCameraChange()) return null;
-            return firstPerson ? curAnimation.firstPersonCameraChange() : curAnimation.cameraChange();
-        }
-    }
+    private static final Map<UUID, CameraStateSnapShot> SnapShots = new HashMap<>();
 
     /**
      * 每客户端 tick 仅锁定当前激活的相机变换动画与 tick，供渲染端采样 cur1。
@@ -127,7 +50,7 @@ public final class CameraTransformStateHandler {
             } else return false;
         });
 
-        SnapShot snapShot = SnapShots.computeIfAbsent(player.getUUID(), uuid -> new SnapShot());
+        CameraStateSnapShot snapShot = SnapShots.computeIfAbsent(player.getUUID(), uuid -> new CameraStateSnapShot());
         testValid: {
             if (max.isEmpty()) break testValid;
             Map.Entry<ResourceLocation, ResourceLocation> entry = max.get();
@@ -144,19 +67,19 @@ public final class CameraTransformStateHandler {
     }
 
     public static boolean relativeEuler(Player player, boolean firstPerson) {
-        SnapShot snapShot = SnapShots.get(player.getUUID());
+        CameraStateSnapShot snapShot = SnapShots.get(player.getUUID());
         if (snapShot == null) return true;
         return snapShot.relativeEuler(firstPerson);
     }
 
     public static @Nullable CameraData getCache(Player player, boolean firstPerson) {
-        SnapShot snapShot = SnapShots.get(player.getUUID());
+        CameraStateSnapShot snapShot = SnapShots.get(player.getUUID());
         if (snapShot == null) return null;
         return snapShot.getCache(firstPerson);
     }
 
     public static @Nullable CameraData getAndStep(Player player, float partialTick, boolean firstPerson) {
-        SnapShot snapShot = SnapShots.get(player.getUUID());
+        CameraStateSnapShot snapShot = SnapShots.get(player.getUUID());
         if (snapShot == null) return null;
         return snapShot.get(partialTick, firstPerson);
     }

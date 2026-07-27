@@ -19,9 +19,9 @@ import java.util.List;
 public record RideData(List<ResourceLocation> componentAnimations, Vec3 offset, int existTick, float xRot, float yRot) {
     public static final Codec<RideData> CODEC = RecordCodecBuilder.create(i -> i.group(
             Codec.list(ResourceLocation.CODEC).fieldOf("componentAnimations").forGetter(RideData::componentAnimations),
-            Vec3.CODEC.fieldOf("offset").forGetter(RideData::offset),
-            Codec.INT.fieldOf("existTick").forGetter(RideData::existTick),
-            Codec.FLOAT.fieldOf("xRot").forGetter(RideData::xRot),
-            Codec.FLOAT.fieldOf("yRot").forGetter(RideData::yRot)
+            Vec3.CODEC.optionalFieldOf("offset", Vec3.ZERO).forGetter(RideData::offset),
+            Codec.INT.optionalFieldOf("existTick", -1).forGetter(RideData::existTick),
+            Codec.FLOAT.optionalFieldOf("xRot", 0f).forGetter(RideData::xRot),
+            Codec.FLOAT.optionalFieldOf("yRot", 0f).forGetter(RideData::yRot)
     ).apply(i, RideData::new));
 }

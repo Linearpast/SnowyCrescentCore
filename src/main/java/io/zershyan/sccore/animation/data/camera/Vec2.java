@@ -6,8 +6,8 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 public record Vec2(double x, double y) {
     public static final Vec2 ZERO = new Vec2(0.0, 0.0);
     public static final Codec<Vec2> CODEC = RecordCodecBuilder.create(i -> i.group(
-            Codec.DOUBLE.fieldOf("x").forGetter(Vec2::x),
-            Codec.DOUBLE.fieldOf("y").forGetter(Vec2::y)
+            Codec.DOUBLE.optionalFieldOf("x", 0d).forGetter(Vec2::x),
+            Codec.DOUBLE.optionalFieldOf("y", 0d).forGetter(Vec2::y)
     ).apply(i, Vec2::new));
 
     public Vec2 add(Vec2 vec) {

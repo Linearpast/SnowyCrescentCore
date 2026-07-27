@@ -2,9 +2,7 @@ package io.zershyan.sccore.animation.core;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.kosmx.playerAnim.api.layered.AnimationStack;
 import dev.kosmx.playerAnim.api.layered.IAnimation;
 import dev.kosmx.playerAnim.api.layered.KeyframeAnimationPlayer;
@@ -21,8 +19,6 @@ import io.zershyan.sccore.animation.api.client.AnimationPlayerHelper;
 import io.zershyan.sccore.animation.api.events.AnimationRegisterEvent;
 import io.zershyan.sccore.animation.api.events.LayerRegisterEvent;
 import io.zershyan.sccore.animation.data.ClientAnimation;
-import io.zershyan.sccore.animation.data.RideData;
-import io.zershyan.sccore.animation.data.camera.CameraChange;
 import io.zershyan.sccore.animation.imixin.IMixinFactoryHolder;
 import io.zershyan.sccore.animation.registry.attachment.PlayerAnimations;
 import io.zershyan.sccore.api.events.client.ResourceLoadEvent;
@@ -55,17 +51,6 @@ public class ClientAnimationRegistry {
     private static final Map<UUID, Map<ResourceLocation, IAnimation>> CacheAnim = new HashMap<>();
     public static final String LAYER_DIR = "animation/layer/";
     public static final String ANIMATION_DIR = "animation/animation/";
-    public static final Codec<ClientAnimation> CLIENT_ANIMATION_CODEC = RecordCodecBuilder.create(i -> i.group(
-            ResourceLocation.CODEC.fieldOf("animationLocation").forGetter(ClientAnimation::animationLocation),
-            Codec.STRING.optionalFieldOf("name").forGetter(ClientAnimation::name),
-            Codec.INT.optionalFieldOf("priority", 0).forGetter(ClientAnimation::priority),
-            RideData.CODEC.optionalFieldOf("rideData").forGetter(ClientAnimation::rideData),
-            Codec.BOOL.optionalFieldOf("defaultThirdPerson", false).forGetter(ClientAnimation::defaultThirdPerson),
-            CameraChange.CODEC.optionalFieldOf("firstPersonCameraChange", new CameraChange())
-                    .forGetter(ClientAnimation::firstPersonCameraChange),
-            CameraChange.CODEC.optionalFieldOf("cameraChange", new CameraChange())
-                    .forGetter(ClientAnimation::cameraChange)
-    ).apply(i, ClientAnimation::new));
 
     @SubscribeEvent
     public static void clientReload(ResourceLoadEvent.Post event) {
@@ -105,7 +90,7 @@ public class ClientAnimationRegistry {
         animationResourceMap.forEach((location, resource) -> {
             try (BufferedReader reader = resource.openAsReader()){
                 JsonElement element = JsonParser.parseReader(reader);
-                Animations.put(location, CLIENT_ANIMATION_CODEC.parse(JsonOps.INSTANCE, element).getOrThrow());
+                Animations.put(location, ClientAnimation.CODEC.parse(JsonOps.INSTANCE, element).getOrThrow());
             } catch (Exception e) {
                 SCCore.log.error(e.getMessage());
             }

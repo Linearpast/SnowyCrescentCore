@@ -18,18 +18,18 @@ public class ServerAnimation extends Animation {
     public static final Codec<ServerAnimation> CODEC = RecordCodecBuilder.create(i -> i.group(
             ResourceLocation.CODEC.fieldOf("animationLocation").forGetter(Animation::animationLocation),
             Codec.STRING.optionalFieldOf("name").forGetter(Animation::name),
-            Codec.INT.fieldOf("priority").forGetter(Animation::priority),
+            Codec.INT.optionalFieldOf("priority", 0).forGetter(Animation::priority),
             RideData.CODEC.optionalFieldOf("rideData").forGetter(Animation::rideData),
-            Codec.BOOL.fieldOf("defaultThirdPerson").forGetter(Animation::defaultThirdPerson),
+            Codec.BOOL.optionalFieldOf("defaultThirdPerson", false).forGetter(Animation::defaultThirdPerson),
             AABBMovement.CODEC.optionalFieldOf("aabbMovement", new AABBMovement()).forGetter(Animation::aabbMovement),
-            Codec.FLOAT.fieldOf("jumpModifier").forGetter(ServerAnimation::jumpModifier)
+            Codec.FLOAT.optionalFieldOf("jumpModifier", 1.0f).forGetter(ServerAnimation::jumpModifier)
     ).apply(i, ServerAnimation::new));
     public static final Codec<ServerAnimation> SUB_CODEC = RecordCodecBuilder.create(i -> i.group(
             ResourceLocation.CODEC.fieldOf("animationLocation").forGetter(ServerAnimation::animationLocation),
             Codec.STRING.optionalFieldOf("name").forGetter(ServerAnimation::name),
-            Codec.INT.fieldOf("priority").forGetter(ServerAnimation::priority),
+            Codec.INT.optionalFieldOf("priority", 0).forGetter(ServerAnimation::priority),
             RideData.CODEC.optionalFieldOf("rideData").forGetter(ServerAnimation::rideData),
-            Codec.BOOL.fieldOf("defaultThirdPerson").forGetter(ServerAnimation::defaultThirdPerson),
+            Codec.BOOL.optionalFieldOf("defaultThirdPerson", false).forGetter(ServerAnimation::defaultThirdPerson),
             AABBMovement.CODEC.optionalFieldOf("aabbMovement", new AABBMovement()).forGetter(Animation::aabbMovement)
     ).apply(i, ServerAnimation::new));
     public ServerAnimation(ResourceLocation animationLocation, Optional<String> name, int priority, Optional<RideData> data, boolean defaultThirdPerson, AABBMovement aabbMovement, float jumpModifier) {
