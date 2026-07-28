@@ -79,6 +79,7 @@ public abstract class MixinEntity {
             if(heightModifier == 1.0f) return;
             setPose(Pose.STANDING);
             cir.setReturnValue(Pose.STANDING);
+            cir.cancel();
         }
     }
 }
